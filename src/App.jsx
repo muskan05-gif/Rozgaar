@@ -4,7 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 import SignInRoute from "../auth/routes/SignInRoute";
-import VerifyOtpRoute from "../auth/routes/VerifyOtpRoute";
+
 
 import FederationLayout from "../federation/FederationLayout";
 import FederationOverview from "../federation/FederationOverview";
@@ -31,7 +31,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<SignInRoute />} />
-          <Route path="/verify-otp" element={<VerifyOtpRoute />} />
+      
 
           <Route
             path="/federation"
