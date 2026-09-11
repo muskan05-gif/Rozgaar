@@ -1,6 +1,7 @@
 import React from "react";
 import { Bell } from "lucide-react";
 import { societyInfo } from "../data/mockData";
+import Avatar from "../../src/shared/Avatar";
 
 export default function TopBar() {
   return (
@@ -25,9 +26,7 @@ export default function TopBar() {
         </button>
 
         <div className="flex items-center gap-2.5 border-l border-stone-200 pl-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900 text-xs font-semibold text-white">
-            {societyInfo.admin.initials}
-          </div>
+          <Avatar name={societyInfo.admin.name} size={32} />
           <div className="leading-tight">
             <p className="text-sm font-medium text-stone-900">
               {societyInfo.admin.name}

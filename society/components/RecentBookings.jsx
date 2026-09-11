@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { ChevronRight } from "lucide-react";
 import { recentBookings } from "../data/mockData";
+import Avatar from "../../src/shared/Avatar";
 
 const statusStyles = {
   Confirmed: "bg-emerald-900 text-white",
@@ -58,9 +59,7 @@ export default function RecentBookings() {
               >
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-stone-100 text-[11px] font-semibold text-stone-600">
-                      {b.initials}
-                    </div>
+                    <Avatar name={b.customer} size={28} />
                     <span className="font-medium text-stone-900">
                       {b.customer}
                     </span>
