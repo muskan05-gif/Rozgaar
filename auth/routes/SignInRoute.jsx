@@ -14,9 +14,9 @@ export default function SignInRoute() {
     // Navigate according to selected role
     if (role === "society") {
       navigate("/society");
-    } else if (role === "federation") {
-      navigate("/federation");
-    }
+    }if (role === "federation") {
+  navigate("/federation/societies");
+}
   };
 
   return <SignIn onSignIn={handleSignIn} />;
