@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, X, ChevronRight } from "lucide-react";
 import { workerVerifications } from "../data/mockData";
+import Avatar from "../../src/shared/Avatar";
 
 export default function WorkerVerifications() {
   return (
@@ -17,9 +18,7 @@ export default function WorkerVerifications() {
       <ul className="flex-1 divide-y divide-stone-100">
         {workerVerifications.map((w) => (
           <li key={w.id} className="flex items-start gap-3 p-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-100 text-xs font-semibold text-stone-600">
-              {w.initials}
-            </div>
+            <Avatar name={w.name} size={32} />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-stone-900">{w.name}</p>
               <p className="text-xs text-stone-400">{w.skill}</p>

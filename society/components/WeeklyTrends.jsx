@@ -1,9 +1,12 @@
 import React from "react";
 import { weeklyTrend, weeklyTrendMeta } from "../data/mockData";
 
+const CHART_HEIGHT = 176; // px — fixed, so bar heights are computed directly instead of relying on nested % heights
+
 export default function WeeklyTrends() {
   const maxValue = Math.max(...weeklyTrend.map((d) => d.value));
   const chartTop = Math.ceil(maxValue / 10) * 10 + 10;
+  const thresholdPx = (weeklyTrendMeta.targetThreshold / chartTop) * CHART_HEIGHT;
 
   return (
     <div className="rounded-lg border border-stone-200 bg-white p-5">
@@ -44,32 +47,30 @@ export default function WeeklyTrends() {
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="relative mt-6 h-48">
-        {/* Target threshold line */}
+      {/* Chart — fixed pixel height, bars sized in px, no nested % heights */}
+      <div className="relative mt-6" style={{ height: CHART_HEIGHT }}>
         <div
           className="absolute left-0 right-0 border-t border-dashed border-stone-300"
-          style={{
-            bottom: `${(weeklyTrendMeta.targetThreshold / chartTop) * 100}%`,
-          }}
+          style={{ bottom: thresholdPx }}
         />
 
-        <div className="flex h-full items-end justify-between gap-3">
-          {weeklyTrend.map((d) => (
-            <div key={d.day} className="flex flex-1 flex-col items-center gap-1.5">
-              {d.isPeak && (
-                <span className="text-[10px] font-medium text-emerald-700">
-                  {d.value} · Peak
-                </span>
-              )}
-              <div className="flex w-full items-end justify-center" style={{ height: "100%" }}>
+        <div className="flex items-end justify-between gap-3" style={{ height: CHART_HEIGHT }}>
+          {weeklyTrend.map((d) => {
+            const barPx = Math.max(4, (d.value / chartTop) * CHART_HEIGHT);
+            return (
+              <div key={d.day} className="flex flex-1 flex-col items-center justify-end gap-1.5">
+                {d.isPeak && (
+                  <span className="text-[10px] font-medium text-emerald-700">
+                    {d.value} · Peak
+                  </span>
+                )}
                 <div
                   className={`w-8 rounded-t-sm ${d.isPeak ? "bg-emerald-900" : "bg-emerald-900/80"}`}
-                  style={{ height: `${(d.value / chartTop) * 100}%` }}
+                  style={{ height: barPx }}
                 />
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
