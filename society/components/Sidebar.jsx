@@ -25,7 +25,7 @@ const ICONS = {
 
 export default function Sidebar() {
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-stone-200 bg-white">
+    <aside className="sticky top-0 flex h-full w-60 shrink-0 flex-col self-start overflow-y-auto border-r border-stone-200 bg-white">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-900">
