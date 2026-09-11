@@ -17,9 +17,11 @@ export const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "" },
   { key: "societies", label: "Societies", icon: "Building2", path: "societies" },
   { key: "workers", label: "Workers", icon: "Users", path: "workers" },
+  { key: "bookings", label: "Bookings", icon: "CalendarCheck", path: "bookings" },
   { key: "policy", label: "Policy & Wages", icon: "ScrollText", path: "policy-wages" },
-  { key: "analytics", label: "Analytics", icon: "BarChart3", path: "analytics" },
   { key: "disputes", label: "Disputes", icon: "Gavel", path: "disputes" },
+  { key: "payouts", label: "Payouts", icon: "Wallet", path: "payouts" },
+  { key: "analytics", label: "Analytics", icon: "BarChart3", path: "analytics" },
   { key: "settings", label: "Settings", icon: "Settings", path: "settings" },
 ];
 

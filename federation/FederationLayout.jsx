@@ -5,12 +5,12 @@ import TopBar from "./components/TopBar";
 
 export default function FederationLayout() {
   return (
-    <div className="flex min-h-screen bg-stone-50">
+    <div className="flex h-screen overflow-hidden bg-stone-50">
       <Sidebar />
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar />
-        <main className="flex-1 space-y-6 p-8">
+        <main className="flex-1 space-y-6 overflow-y-auto p-8">
           <Outlet />
         </main>
       </div>
