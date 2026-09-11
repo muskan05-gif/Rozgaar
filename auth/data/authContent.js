@@ -35,6 +35,6 @@ export const footerInfo = {
 };
 
 export const roleOptions = [
-  { key: "society", label: "Society Admin" },
-  { key: "federation", label: "Federation Admin" },
+  { key: "society", label: "Society" },
+  { key: "federation", label: "Federation" },
 ];
