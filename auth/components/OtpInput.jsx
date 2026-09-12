@@ -1,9 +1,13 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 const LENGTH = 6;
 
 export default function OtpInput({ value, onChange }) {
   const inputsRef = useRef([]);
+
+  useEffect(() => {
+    inputsRef.current[0]?.focus();
+  }, []);
 
   const setDigit = (index, digit) => {
     const next = value.split("");

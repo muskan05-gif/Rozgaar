@@ -5,7 +5,7 @@ import { societies, districtOptions } from "../data/mockData";
 const PAGE_SIZE = 6;
 
 const statusStyles = {
-  Active: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Active: "bg-brand-50 text-brand-700 border-brand-200",
   Pending: "bg-amber-50 text-amber-700 border-amber-200",
 };
 
@@ -30,7 +30,7 @@ export default function SocietyTable() {
   );
 
   return (
-    <div className="rounded-lg border border-stone-200 bg-white">
+    <div className="rounded-lg border border-stone-200 bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 p-5">
         <div>
           <h2 className="text-base font-semibold text-stone-900">
@@ -54,7 +54,7 @@ export default function SocietyTable() {
                 setPage(1);
               }}
               placeholder="Search society..."
-              className="w-48 rounded-md border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+              className="w-48 rounded-md border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#141B33]/15"
             />
           </div>
 
@@ -65,7 +65,7 @@ export default function SocietyTable() {
                 setDistrict(e.target.value);
                 setPage(1);
               }}
-              className="appearance-none rounded-md border border-stone-300 bg-white py-1.5 pl-3 pr-8 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+              className="appearance-none rounded-md border border-stone-300 bg-white py-1.5 pl-3 pr-8 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-[#141B33]/15"
             >
               <option>All Districts</option>
               {districtOptions.slice(1).map((d) => (
@@ -85,7 +85,7 @@ export default function SocietyTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-400">
+            <tr className="border-b border-stone-200 bg-stone-50/60 text-xs uppercase tracking-wide text-stone-400">
               <th className="px-5 py-3 font-medium">Society Name</th>
               <th className="px-5 py-3 font-medium">Workers</th>
               <th className="px-5 py-3 font-medium">Disbursed</th>
@@ -167,7 +167,7 @@ export default function SocietyTable() {
               onClick={() => setPage(p)}
               className={`h-7 w-7 rounded-md text-xs font-medium ${
                 p === page
-                  ? "bg-emerald-900 text-white"
+                  ? "bg-[#141B33] text-white"
                   : "text-stone-600 hover:bg-stone-100"
               }`}
             >

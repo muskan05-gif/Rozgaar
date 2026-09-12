@@ -5,7 +5,7 @@ import Avatar from "../../src/shared/Avatar";
 
 export default function WorkerVerifications() {
   return (
-    <div className="flex flex-col rounded-lg border border-stone-200 bg-white">
+    <div className="flex flex-col rounded-lg border border-stone-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-stone-200 p-5">
         <h2 className="text-base font-semibold text-stone-900">
           Worker Verifications
@@ -30,7 +30,7 @@ export default function WorkerVerifications() {
               <button
                 type="button"
                 aria-label={`Approve ${w.name}`}
-                className="flex h-7 w-7 items-center justify-center rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                className="flex h-7 w-7 items-center justify-center rounded-md border border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100"
               >
                 <Check size={14} />
               </button>
@@ -48,7 +48,7 @@ export default function WorkerVerifications() {
 
       <button
         type="button"
-        className="flex items-center justify-center gap-1 border-t border-stone-200 py-3 text-sm font-medium text-emerald-700 hover:bg-stone-50"
+        className="flex items-center justify-center gap-1 border-t border-stone-200 py-3 text-sm font-medium text-brand-700 hover:bg-stone-50"
       >
         Open Full KYC Queue ({workerVerifications.length})
         <ChevronRight size={14} />

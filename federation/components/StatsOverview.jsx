@@ -12,13 +12,13 @@ export default function StatsOverview() {
         return (
           <div
             key={stat.key}
-            className="rounded-lg border border-stone-200 bg-white p-4"
+            className="rounded-lg border border-stone-200 bg-white shadow-sm p-4"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium uppercase tracking-wide text-stone-400">
                 {stat.label}
               </span>
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-50 text-brand-700">
                 <Icon size={14} />
               </span>
             </div>

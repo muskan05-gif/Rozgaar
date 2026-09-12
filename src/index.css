@@ -9,6 +9,46 @@ body,
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle depth on every card/table/panel across the app — applied globally
+   here instead of adding a shadow className to every single component, so
+   the whole UI gets a consistent "lifted" surface look for free. */
+.border-stone-200 {
+  box-shadow: 0 1px 2px 0 rgba(20, 27, 51, 0.04);
+}
+
+/* Slightly crisper focus rings app-wide, matching the brand navy. */
+:focus-visible {
+  outline: 2px solid rgba(20, 27, 51, 0.35);
+  outline-offset: 2px;
+}
+
+/* Smooth, consistent transitions for interactive surfaces. */
+button,
+a,
+select,
+input {
+  transition: background-color 150ms ease, border-color 150ms ease,
+    color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+/* Custom scrollbar so the app doesn't default to the OS's chunky bar. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a29e;
 }

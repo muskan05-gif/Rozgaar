@@ -31,12 +31,12 @@ export default function Reports() {
         {reportStats.map((stat) => {
           const Icon = STAT_ICONS[stat.icon];
           return (
-            <div key={stat.key} className="rounded-lg border border-stone-200 bg-white p-4">
+            <div key={stat.key} className="rounded-lg border border-stone-200 bg-white shadow-sm p-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium uppercase tracking-wide text-stone-400">
                   {stat.label}
                 </span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-50 text-brand-700">
                   <Icon size={14} />
                 </span>
               </div>
@@ -51,8 +51,8 @@ export default function Reports() {
         {availableReports.map((r) => {
           const Icon = REPORT_ICONS[r.icon];
           return (
-            <div key={r.key} className="flex flex-col rounded-lg border border-stone-200 bg-white p-5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+            <div key={r.key} className="flex flex-col rounded-lg border border-stone-200 bg-white shadow-sm p-5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-brand-50 text-brand-700">
                 <Icon size={17} />
               </span>
               <h3 className="mt-3 text-sm font-semibold text-stone-900">{r.title}</h3>
@@ -61,7 +61,7 @@ export default function Reports() {
                 <span className="text-xs text-stone-400">Last generated {r.lastGenerated}</span>
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 hover:underline"
+                  className="flex items-center gap-1.5 text-xs font-medium text-brand-700 hover:underline"
                 >
                   <Download size={13} />
                   Download

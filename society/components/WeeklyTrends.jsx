@@ -9,7 +9,7 @@ export default function WeeklyTrends() {
   const thresholdPx = (weeklyTrendMeta.targetThreshold / chartTop) * CHART_HEIGHT;
 
   return (
-    <div className="rounded-lg border border-stone-200 bg-white p-5">
+    <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5">
@@ -28,11 +28,11 @@ export default function WeeklyTrends() {
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-4 text-xs text-stone-500">
             <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-sm bg-emerald-900" />
+              <span className="h-2.5 w-2.5 rounded-sm bg-[#141B33]" />
               Completed Bookings
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-sm bg-stone-200" />
+              <span className="h-2.5 w-2.5 rounded-sm border border-stone-400 bg-stone-100" />
               Target Threshold
             </span>
           </div>
@@ -60,12 +60,12 @@ export default function WeeklyTrends() {
             return (
               <div key={d.day} className="flex flex-1 flex-col items-center justify-end gap-1.5">
                 {d.isPeak && (
-                  <span className="text-[10px] font-medium text-emerald-700">
+                  <span className="text-[10px] font-medium text-brand-700">
                     {d.value} · Peak
                   </span>
                 )}
                 <div
-                  className={`w-8 rounded-t-sm ${d.isPeak ? "bg-emerald-900" : "bg-emerald-900/80"}`}
+                  className={`w-8 rounded-t-sm ${d.isPeak ? "bg-[#141B33]" : "bg-[#141B33]/80"}`}
                   style={{ height: barPx }}
                 />
               </div>

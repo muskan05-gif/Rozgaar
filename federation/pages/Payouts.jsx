@@ -1,14 +1,41 @@
-import React from "react";
-import { PlayCircle, Search, FileCheck2, Landmark, ScaleIcon, KeyRound } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { PlayCircle, Search, Landmark, ScaleIcon, KeyRound, CheckCircle2 } from "lucide-react";
 import Avatar from "../../src/shared/Avatar";
-import { payoutSummary, settlementRoster, payoutFooterNotes } from "../data/federationExtras";
+import Modal from "../../src/shared/Modal";
+import { payoutSummary, settlementRoster as initialRoster, payoutFooterNotes } from "../data/federationExtras";
 
 const statusStyles = {
-  Paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Paid: "bg-brand-50 text-brand-700 border-brand-200",
   Hold: "bg-amber-50 text-amber-700 border-amber-200",
 };
 
 export default function Payouts() {
+  const [query, setQuery] = useState("");
+  const [roster, setRoster] = useState(initialRoster);
+  const [processOpen, setProcessOpen] = useState(false);
+  const [processDone, setProcessDone] = useState(false);
+
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return roster.filter(
+      (r) =>
+        !q ||
+        r.name.toLowerCase().includes(q) ||
+        r.society.toLowerCase().includes(q) ||
+        r.role.toLowerCase().includes(q)
+    );
+  }, [query, roster]);
+
+  const closeProcess = () => {
+    setProcessOpen(false);
+    setProcessDone(false);
+  };
+
+  const runProcess = () => {
+    setRoster((prev) => prev.map((r) => (r.status === "Hold" ? r : { ...r, status: "Paid" })));
+    setProcessDone(true);
+  };
+
   return (
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -23,7 +50,8 @@ export default function Payouts() {
         </div>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-md bg-emerald-900 px-3.5 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+          onClick={() => setProcessOpen(true)}
+          className="flex items-center gap-2 rounded-md bg-[#141B33] px-3.5 py-2 text-sm font-medium text-white hover:bg-[#1c2647]"
         >
           <PlayCircle size={16} />
           Process Payouts (₹8,42,500)
@@ -51,8 +79,10 @@ export default function Payouts() {
           <div className="relative">
             <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400" />
             <input
-              placeholder="Search by worker name, id, trade..."
-              className="w-64 rounded-md border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by worker name, society, trade..."
+              className="w-72 rounded-md border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#141B33]/15"
             />
           </div>
         </div>
@@ -71,7 +101,7 @@ export default function Payouts() {
               </tr>
             </thead>
             <tbody>
-              {settlementRoster.map((r) => (
+              {filtered.map((r) => (
                 <tr key={r.name} className="border-b border-stone-100 last:border-0 hover:bg-stone-50">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">
@@ -94,6 +124,9 @@ export default function Payouts() {
                   </td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr><td colSpan={7} className="px-5 py-8 text-center text-sm text-stone-400">No workers match your search.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -120,6 +153,27 @@ export default function Payouts() {
           </div>
         </div>
       </div>
+
+      <Modal open={processOpen} onClose={closeProcess} title="Process Payouts">
+        {processDone ? (
+          <div className="flex flex-col items-center py-6 text-center">
+            <CheckCircle2 size={36} className="text-emerald-600" />
+            <p className="mt-3 text-sm font-medium text-stone-900">Batch processed</p>
+            <p className="mt-1 text-sm text-stone-500">All non-held settlements have been marked Paid across all societies.</p>
+            <button type="button" onClick={closeProcess} className="mt-4 rounded-md bg-[#141B33] px-4 py-2 text-sm font-medium text-white hover:bg-[#1c2647]">Done</button>
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm text-stone-600">
+              This will settle ₹8,42,500 across all federated societies via NEFT, excluding accounts on hold pending KYC.
+            </p>
+            <div className="mt-5 flex justify-end gap-2.5">
+              <button type="button" onClick={closeProcess} className="rounded-md border border-stone-300 px-3.5 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50">Cancel</button>
+              <button type="button" onClick={runProcess} className="rounded-md bg-[#141B33] px-3.5 py-2 text-sm font-medium text-white hover:bg-[#1c2647]">Confirm & Process</button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }
