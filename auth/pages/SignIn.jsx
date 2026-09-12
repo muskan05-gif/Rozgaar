@@ -5,11 +5,8 @@ import PromoPanel from "../components/PromoPanel";
 import RoleToggle from "../components/RoleToggle";
 import { footerInfo } from "../data/authContent";
 
-<<<<<<< HEAD
+
 export default function SignIn({ onSignIn, isLoading = false, error = "" }) {
-=======
-export default function SignIn({ onSignIn }) {
->>>>>>> 203931cdfaf9c70b0f98c67b26b780ba1eac1efa
   const navigate = useNavigate();
 
   const [role, setRole] = useState("society");
@@ -117,7 +114,6 @@ export default function SignIn({ onSignIn }) {
               </div>
             </div>
 
-<<<<<<< HEAD
             {/* Error message from the backend */}
             {error && (
               <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
@@ -133,15 +129,6 @@ export default function SignIn({ onSignIn }) {
             >
               {isLoading ? "Signing in..." : "Sign In"}
               {!isLoading && <ArrowRight size={15} />}
-=======
-            {/* Sign In */}
-            <button
-              type="submit"
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-[#141B33] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1c2647]"
-            >
-              Sign In
-              <ArrowRight size={15} />
->>>>>>> 203931cdfaf9c70b0f98c67b26b780ba1eac1efa
             </button>
 
             {/* Sign Up */}

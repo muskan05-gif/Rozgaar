@@ -6,11 +6,11 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   // Confirmed logged-in user
-<<<<<<< HEAD
+
   // { role, userId, token, backendRole } | null
-=======
+
   // { role, userId, password } | null
->>>>>>> 203931cdfaf9c70b0f98c67b26b780ba1eac1efa
+
   const [session, setSession] = useState(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
     }
   }, [session]);
 
-<<<<<<< HEAD
+
   // Call this after the backend confirms login. `token` is the JWT
   // access_token — we store that, never the raw password. `role` is
   // the app's routing tier ("society" | "federation"); `backendRole`
@@ -40,14 +40,9 @@ export function AuthProvider({ children }) {
       userId,
       token,
       backendRole,
-=======
+
   // Login with Society/Federation ID + Password
-  const startSignIn = (role, userId, password) => {
-    const newSession = {
-      role,
-      userId,
-      password,
->>>>>>> 203931cdfaf9c70b0f98c67b26b780ba1eac1efa
+
     };
 
     setSession(newSession);

@@ -1,21 +1,13 @@
-<<<<<<< HEAD
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SignIn from "../pages/SignIn";
 import { useAuth } from "../../src/context/AuthContext";
 import { federationLogin } from "../../src/lib/authApi";
-=======
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import SignIn from "../pages/SignIn";
-import { useAuth } from "../../src/context/AuthContext";
->>>>>>> 203931cdfaf9c70b0f98c67b26b780ba1eac1efa
 
 export default function SignInRoute() {
   const navigate = useNavigate();
   const { startSignIn } = useAuth();
 
-<<<<<<< HEAD
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -51,19 +43,4 @@ export default function SignInRoute() {
   return (
     <SignIn onSignIn={handleSignIn} isLoading={isLoading} error={error} />
   );
-=======
-  const handleSignIn = ({ role, societyId, password }) => {
-    // Save authenticated session
-    startSignIn(role, societyId, password);
-
-    // Navigate according to selected role
-    if (role === "society") {
-      navigate("/society");
-    }if (role === "federation") {
-  navigate("/federation/societies");
-}
-  };
-
-  return <SignIn onSignIn={handleSignIn} />;
->>>>>>> 203931cdfaf9c70b0f98c67b26b780ba1eac1efa
 }
