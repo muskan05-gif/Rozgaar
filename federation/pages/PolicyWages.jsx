@@ -19,7 +19,7 @@ export default function PolicyWages() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-stone-200 bg-white p-5">
+      <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
         <h2 className="flex items-center gap-2 text-base font-semibold text-stone-900">
           <Scale size={16} className="text-stone-400" />
           Statutory Fair-Wage &amp; Commission Benchmarks
@@ -35,7 +35,7 @@ export default function PolicyWages() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-stone-200 bg-white p-5">
+      <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
         <h2 className="text-base font-semibold text-stone-900">Dispatch Governance Rules</h2>
         <ul className="mt-3 divide-y divide-stone-100">
           {toggles.map((t) => (
@@ -54,7 +54,7 @@ export default function PolicyWages() {
                 onClick={() => toggle(t.key)}
                 aria-label={`Toggle ${t.label}`}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-                  t.enabled ? "bg-emerald-700" : "bg-stone-300"
+                  t.enabled ? "bg-[#141B33]" : "bg-stone-300"
                 }`}
               >
                 <span
@@ -68,7 +68,7 @@ export default function PolicyWages() {
         </ul>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-stone-200 bg-white p-5">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-stone-200 bg-white shadow-sm p-5">
         <div className="flex items-start gap-3">
           <ShieldCheck size={18} className="mt-0.5 shrink-0 text-emerald-600" />
           <div>
@@ -100,7 +100,7 @@ function BenchmarkCard({ label, value, unit, note }) {
       <p className="mt-1 text-xl font-semibold text-stone-900">
         {value} <span className="text-xs font-normal text-stone-400">{unit}</span>
       </p>
-      <p className="mt-1 text-xs text-emerald-700">{note}</p>
+      <p className="mt-1 text-xs text-brand-700">{note}</p>
     </div>
   );
 }

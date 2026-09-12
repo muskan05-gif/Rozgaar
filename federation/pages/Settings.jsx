@@ -35,7 +35,7 @@ export default function Settings() {
             onClick={() => setTab(t)}
             className={`border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
               tab === t
-                ? "border-emerald-900 text-emerald-900"
+                ? "border-brand-900 text-brand-900"
                 : "border-transparent text-stone-500 hover:text-stone-700"
             }`}
           >
@@ -45,7 +45,7 @@ export default function Settings() {
       </div>
 
       {tab === "Cooperative Profile" && (
-        <div className="rounded-lg border border-stone-200 bg-white p-5">
+        <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
           <h2 className="text-base font-semibold text-stone-900">Cooperative Profile</h2>
           <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Federation Name" value={cooperativeProfile.name} />
@@ -65,13 +65,13 @@ export default function Settings() {
       )}
 
       {tab === "Team & Roles" && (
-        <div className="rounded-lg border border-stone-200 bg-white">
+        <div className="rounded-lg border border-stone-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-stone-200 p-5">
             <div>
               <h2 className="text-base font-semibold text-stone-900">Team &amp; Roles</h2>
               <p className="mt-0.5 text-sm text-stone-500">People with administrative access at the federation level.</p>
             </div>
-            <button type="button" className="flex items-center gap-1.5 rounded-md bg-emerald-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-800">
+            <button type="button" className="flex items-center gap-1.5 rounded-md bg-[#141B33] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#1c2647]">
               <UserPlus size={15} />
               Invite Member
             </button>
@@ -86,7 +86,7 @@ export default function Settings() {
                     <p className="text-xs text-stone-400">{m.role} · {m.access}</p>
                   </div>
                 </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${m.active ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${m.active ? "bg-brand-50 text-brand-700" : "bg-stone-100 text-stone-500"}`}>
                   {m.active ? "Active" : "Invited"}
                 </span>
               </li>
@@ -96,7 +96,7 @@ export default function Settings() {
       )}
 
       {tab === "Notification Dispatch" && (
-        <div className="rounded-lg border border-stone-200 bg-white p-5">
+        <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
           <h2 className="text-base font-semibold text-stone-900">Notification Dispatch</h2>
           <ul className="mt-3 divide-y divide-stone-100">
             {prefs.map((p) => (
@@ -109,7 +109,7 @@ export default function Settings() {
                   type="button"
                   onClick={() => toggle(p.key)}
                   aria-label={`Toggle ${p.label}`}
-                  className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${p.enabled ? "bg-emerald-700" : "bg-stone-300"}`}
+                  className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${p.enabled ? "bg-[#141B33]" : "bg-stone-300"}`}
                 >
                   <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${p.enabled ? "translate-x-4" : "translate-x-0.5"}`} />
                 </button>
@@ -120,7 +120,7 @@ export default function Settings() {
       )}
 
       {tab === "Federation Hierarchy" && (
-        <div className="rounded-lg border border-stone-200 bg-white p-5">
+        <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
           <h2 className="flex items-center gap-2 text-base font-semibold text-stone-900">
             <Network size={16} className="text-stone-400" />
             Society &amp; Federation Hierarchy Management
@@ -131,7 +131,7 @@ export default function Settings() {
 
           <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4">
             <div className="flex items-center gap-2">
-              <Star size={14} className="text-emerald-700" />
+              <Star size={14} className="text-brand-700" />
               <span className="text-sm font-semibold text-stone-900">{federationHierarchy.name}</span>
               <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-stone-500">
                 {federationHierarchy.code}
@@ -142,7 +142,7 @@ export default function Settings() {
               <div key={cluster.name} className="ml-4 mt-3 border-l-2 border-stone-200 pl-4">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-stone-800">{cluster.name}</span>
-                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                  <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-medium text-brand-700">
                     {cluster.code}
                   </span>
                 </div>
@@ -150,13 +150,13 @@ export default function Settings() {
                   <div
                     key={soc.name}
                     className={`ml-4 mt-2 flex items-center justify-between rounded-md border px-3 py-2 text-sm ${
-                      soc.current ? "border-emerald-300 bg-emerald-50" : "border-stone-200 bg-white"
+                      soc.current ? "border-brand-300 bg-brand-50" : "border-stone-200 bg-white"
                     }`}
                   >
-                    <span className={soc.current ? "font-medium text-emerald-800" : "text-stone-700"}>
+                    <span className={soc.current ? "font-medium text-brand-800" : "text-stone-700"}>
                       {soc.name}
                       {soc.current && (
-                        <span className="ml-2 rounded-full bg-emerald-700 px-1.5 py-0.5 text-[9px] font-medium text-white">
+                        <span className="ml-2 rounded-full bg-[#141B33] px-1.5 py-0.5 text-[9px] font-medium text-white">
                           CURRENT NODE
                         </span>
                       )}

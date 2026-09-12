@@ -32,8 +32,8 @@ export default function Sidebar() {
     <aside className="sticky top-0 flex h-full w-60 shrink-0 flex-col self-start overflow-y-auto border-r border-stone-200 bg-white">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-900">
-          <Leaf className="h-4.5 w-4.5 text-emerald-100" size={18} />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#141B33]">
+          <Leaf className="h-4.5 w-4.5 text-white/80" size={18} />
         </div>
         <div className="leading-tight">
           <p className="text-sm font-semibold text-stone-900">
@@ -52,12 +52,12 @@ export default function Sidebar() {
           return (
             <NavLink
               key={item.key}
-              to={`/federation/${item.path}`}
+              to={item.path ? `/federation/${item.path}` : "/federation"}
               end={item.path === ""}
               className={({ isActive }) =>
                 `group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
                   isActive
-                    ? "bg-emerald-900 text-white font-medium"
+                    ? "bg-[#141B33] text-white font-medium"
                     : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
                 }`
               }
@@ -67,7 +67,7 @@ export default function Sidebar() {
                   <Icon
                     size={17}
                     strokeWidth={2}
-                    className={isActive ? "text-emerald-100" : "text-stone-400 group-hover:text-stone-600"}
+                    className={isActive ? "text-white/80" : "text-stone-400 group-hover:text-stone-600"}
                   />
                   {item.label}
                 </>
@@ -78,14 +78,14 @@ export default function Sidebar() {
       </nav>
 
       {/* Apex authority card */}
-      <div className="m-3 rounded-lg border border-emerald-100 bg-emerald-50 p-3.5">
+      <div className="m-3 rounded-lg border border-[#141B33]/15 bg-[#141B33]/5 p-3.5">
         <div className="flex items-center gap-2">
-          <ShieldCheck size={15} className="text-emerald-700" />
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">
+          <ShieldCheck size={15} className="text-[#141B33]" />
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-[#141B33]">
             Apex Authority
           </span>
         </div>
-        <p className="mt-1.5 text-xs leading-snug text-emerald-900">
+        <p className="mt-1.5 text-xs leading-snug text-[#141B33]">
           {federationInfo.name} holds apex oversight for all member societies
           in {federationInfo.zone}.
         </p>

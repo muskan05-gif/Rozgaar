@@ -57,13 +57,13 @@ export const stats = [
 ];
 
 export const societyLocations = [
-  { id: 1, name: "Kapurthala Civil", x: 46, y: 40, status: "active" },
-  { id: 2, name: "Kapurthala Majra", x: 52, y: 32, status: "active" },
-  { id: 3, name: "Jalandhar Mills", x: 60, y: 46, status: "active" },
-  { id: 4, name: "Hoshiarpur Cantt", x: 38, y: 56, status: "active" },
-  { id: 5, name: "Moga Rural", x: 66, y: 60, status: "onboarding" },
-  { id: 6, name: "Ferozepur Border", x: 30, y: 68, status: "active" },
-  { id: 7, name: "Ludhiana South", x: 70, y: 34, status: "active" },
+  { id: 1, name: "Kapurthala Civil", x: 46, y: 40, status: "active", district: "Kapurthala District" },
+  { id: 2, name: "Kapurthala Majra", x: 52, y: 32, status: "active", district: "Kapurthala District" },
+  { id: 3, name: "Jalandhar Mills", x: 60, y: 46, status: "active", district: "Jalandhar District" },
+  { id: 4, name: "Hoshiarpur Cantt", x: 38, y: 56, status: "active", district: "Hoshiarpur District" },
+  { id: 5, name: "Moga Rural", x: 66, y: 60, status: "onboarding", district: "Ludhiana District" },
+  { id: 6, name: "Ferozepur Border", x: 30, y: 68, status: "active", district: "Hoshiarpur District" },
+  { id: 7, name: "Ludhiana South", x: 70, y: 34, status: "active", district: "Ludhiana District" },
 ];
 
 export const districtOptions = [

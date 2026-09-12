@@ -1,6 +1,14 @@
 import React from "react";
-import { Bell, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { federationInfo } from "../data/mockData";
+import Avatar from "../../src/shared/Avatar";
+import NotificationsBell from "../../src/shared/NotificationsBell";
+
+const federationNotifications = [
+  { id: 1, title: "New society onboarding request", detail: "Ferozepur Multi-Service submitted charter application", time: "20 min ago" },
+  { id: 2, title: "Dispute escalated to apex", detail: "FED-DSP-4452 \u2014 Damaged Materials claim", time: "2 hr ago" },
+  { id: 3, title: "Payout batch processed", detail: "\u20B98,42,500 settled across 6 societies", time: "5 hr ago" },
+];
 
 export default function TopBar() {
   return (
@@ -12,19 +20,10 @@ export default function TopBar() {
       </div>
 
       <div className="flex items-center gap-4">
-        <button
-          type="button"
-          className="relative rounded-full p-2 text-stone-500 hover:bg-stone-100"
-          aria-label="Notifications"
-        >
-          <Bell size={18} />
-          <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
-        </button>
+        <NotificationsBell items={federationNotifications} />
 
         <div className="flex items-center gap-2.5 border-l border-stone-200 pl-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900 text-xs font-semibold text-white">
-            {federationInfo.director.initials}
-          </div>
+          <Avatar name={federationInfo.director.name} size={32} />
           <div className="leading-tight">
             <p className="text-sm font-medium text-stone-900">
               {federationInfo.director.name}

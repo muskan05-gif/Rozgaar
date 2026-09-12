@@ -4,7 +4,7 @@ import { recentBookings } from "../data/mockData";
 import Avatar from "../../src/shared/Avatar";
 
 const statusStyles = {
-  Confirmed: "bg-emerald-900 text-white",
+  Confirmed: "bg-[#141B33] text-white",
   Pending: "bg-amber-50 text-amber-700 border border-amber-200",
 };
 
@@ -21,7 +21,7 @@ export default function RecentBookings() {
   }, []);
 
   return (
-    <div className="flex flex-col rounded-lg border border-stone-200 bg-white lg:col-span-2">
+    <div className="flex flex-col rounded-lg border border-stone-200 bg-white shadow-sm lg:col-span-2">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200 p-5">
         <div className="flex items-center gap-2.5">
           <h2 className="text-base font-semibold text-stone-900">
@@ -33,7 +33,7 @@ export default function RecentBookings() {
         </div>
         <button
           type="button"
-          className="flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-800"
+          className="flex items-center gap-1 text-sm font-medium text-[#141B33] hover:text-[#1c2647]"
         >
           View all bookings
           <ChevronRight size={14} />
@@ -43,7 +43,7 @@ export default function RecentBookings() {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-400">
+            <tr className="border-b border-stone-200 bg-stone-50/60 text-xs uppercase tracking-wide text-stone-400">
               <th className="px-5 py-3 font-medium">Customer</th>
               <th className="px-5 py-3 font-medium">Service</th>
               <th className="px-5 py-3 font-medium">Assigned Worker</th>

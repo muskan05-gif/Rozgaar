@@ -1,17 +1,51 @@
-import React from "react";
-import { Wallet, Clock, Timer, ShieldCheck, Download, PlayCircle } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Wallet, Clock, Timer, ShieldCheck, Download, PlayCircle, Search, CheckCircle2 } from "lucide-react";
 import Avatar from "../../src/shared/Avatar";
-import { payoutStats, payoutRecords, payoutConfig } from "../data/societyExtras";
+import Modal from "../../src/shared/Modal";
+import { exportToCsv } from "../../src/shared/exportCsv";
+import { payoutStats, payoutRecords as initialRecords, payoutConfig } from "../data/societyExtras";
 
 const ICONS = { Wallet, Clock, Timer, ShieldCheck };
 
 const statusStyles = {
-  Paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Paid: "bg-brand-50 text-brand-700 border-brand-200",
   Pending: "bg-amber-50 text-amber-700 border-amber-200",
   Failed: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
 export default function Payouts() {
+  const [query, setQuery] = useState("");
+  const [records, setRecords] = useState(initialRecords);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchDone, setBatchDone] = useState(false);
+
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return records.filter(
+      (r) =>
+        !q ||
+        r.worker.toLowerCase().includes(q) ||
+        r.account.toLowerCase().includes(q) ||
+        r.status.toLowerCase().includes(q)
+    );
+  }, [query, records]);
+
+  const handleAction = (worker) => {
+    setRecords((prev) =>
+      prev.map((r) => (r.worker === worker ? { ...r, status: "Paid", lastPayout: "Today" } : r))
+    );
+  };
+
+  const runBatch = () => {
+    setRecords((prev) => prev.map((r) => (r.status !== "Paid" ? { ...r, status: "Paid", lastPayout: "Today" } : r)));
+    setBatchDone(true);
+  };
+
+  const closeBatch = () => {
+    setBatchOpen(false);
+    setBatchDone(false);
+  };
+
   return (
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -25,6 +59,7 @@ export default function Payouts() {
         <div className="flex items-center gap-2.5">
           <button
             type="button"
+            onClick={() => exportToCsv("payout-ledger", records)}
             className="flex items-center gap-2 rounded-md border border-stone-300 bg-white px-3.5 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
           >
             <Download size={16} />
@@ -32,7 +67,8 @@ export default function Payouts() {
           </button>
           <button
             type="button"
-            className="flex items-center gap-2 rounded-md bg-emerald-900 px-3.5 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+            onClick={() => setBatchOpen(true)}
+            className="flex items-center gap-2 rounded-md bg-[#141B33] px-3.5 py-2 text-sm font-medium text-white hover:bg-[#1c2647]"
           >
             <PlayCircle size={16} />
             Run Payout Batch
@@ -49,7 +85,7 @@ export default function Payouts() {
                 <span className="text-xs font-medium uppercase tracking-wide text-stone-400">
                   {stat.label}
                 </span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-50 text-brand-700">
                   <Icon size={14} />
                 </span>
               </div>
@@ -61,11 +97,22 @@ export default function Payouts() {
       </div>
 
       <div className="rounded-lg border border-stone-200 bg-white">
-        <div className="border-b border-stone-200 p-5">
-          <h2 className="text-base font-semibold text-stone-900">Payout Queue</h2>
-          <p className="mt-0.5 text-sm text-stone-500">
-            Wages owed to workers based on completed and escrow-cleared bookings.
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 p-5">
+          <div>
+            <h2 className="text-base font-semibold text-stone-900">Payout Queue</h2>
+            <p className="mt-0.5 text-sm text-stone-500">
+              Wages owed to workers based on completed and escrow-cleared bookings.
+            </p>
+          </div>
+          <div className="relative">
+            <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search worker, account, or status..."
+              className="w-64 rounded-md border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#141B33]/15"
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -81,7 +128,7 @@ export default function Payouts() {
               </tr>
             </thead>
             <tbody>
-              {payoutRecords.map((r) => (
+              {filtered.map((r) => (
                 <tr key={r.worker} className="border-b border-stone-100 last:border-0 hover:bg-stone-50">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">
@@ -100,6 +147,7 @@ export default function Payouts() {
                   <td className="px-5 py-3.5 text-right">
                     <button
                       type="button"
+                      onClick={() => handleAction(r.worker)}
                       className="rounded-md border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-100"
                     >
                       {r.status === "Pending" ? "Release" : r.status === "Failed" ? "Retry" : "View Receipt"}
@@ -107,6 +155,11 @@ export default function Payouts() {
                   </td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-stone-400">No payouts match your search.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -121,6 +174,27 @@ export default function Payouts() {
           <ConfigItem label="Schedule" value={payoutConfig.schedule} />
         </div>
       </div>
+
+      <Modal open={batchOpen} onClose={closeBatch} title="Run Payout Batch">
+        {batchDone ? (
+          <div className="flex flex-col items-center py-6 text-center">
+            <CheckCircle2 size={36} className="text-emerald-600" />
+            <p className="mt-3 text-sm font-medium text-stone-900">Batch processed</p>
+            <p className="mt-1 text-sm text-stone-500">All pending and failed payouts have been marked Paid.</p>
+            <button type="button" onClick={closeBatch} className="mt-4 rounded-md bg-[#141B33] px-4 py-2 text-sm font-medium text-white hover:bg-[#1c2647]">Done</button>
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm text-stone-600">
+              This will process all pending and failed payouts in the queue and mark them as paid via automatic NEFT settlement.
+            </p>
+            <div className="mt-5 flex justify-end gap-2.5">
+              <button type="button" onClick={closeBatch} className="rounded-md border border-stone-300 px-3.5 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50">Cancel</button>
+              <button type="button" onClick={runBatch} className="rounded-md bg-[#141B33] px-3.5 py-2 text-sm font-medium text-white hover:bg-[#1c2647]">Confirm & Run Batch</button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }

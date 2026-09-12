@@ -24,7 +24,7 @@ export default function Settings() {
       </div>
 
       {/* Society profile */}
-      <div className="rounded-lg border border-stone-200 bg-white p-5">
+      <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
         <h2 className="text-base font-semibold text-stone-900">Society Profile</h2>
         <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Society Name" value={societyInfo.name} />
@@ -41,7 +41,7 @@ export default function Settings() {
       </div>
 
       {/* Admin users */}
-      <div className="rounded-lg border border-stone-200 bg-white">
+      <div className="rounded-lg border border-stone-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-stone-200 p-5">
           <div>
             <h2 className="text-base font-semibold text-stone-900">Admin Users</h2>
@@ -51,7 +51,7 @@ export default function Settings() {
           </div>
           <button
             type="button"
-            className="flex items-center gap-1.5 rounded-md bg-emerald-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-800"
+            className="flex items-center gap-1.5 rounded-md bg-[#141B33] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#1c2647]"
           >
             <UserPlus size={15} />
             Invite Admin
@@ -70,7 +70,7 @@ export default function Settings() {
               <span
                 className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                   a.active
-                    ? "bg-emerald-50 text-emerald-700"
+                    ? "bg-brand-50 text-brand-700"
                     : "bg-stone-100 text-stone-500"
                 }`}
               >
@@ -82,7 +82,7 @@ export default function Settings() {
       </div>
 
       {/* Notification preferences */}
-      <div className="rounded-lg border border-stone-200 bg-white p-5">
+      <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
         <h2 className="text-base font-semibold text-stone-900">Notification Preferences</h2>
         <ul className="mt-3 divide-y divide-stone-100">
           {prefs.map((p) => (
@@ -96,7 +96,7 @@ export default function Settings() {
                 onClick={() => toggle(p.key)}
                 aria-label={`Toggle ${p.label}`}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-                  p.enabled ? "bg-emerald-700" : "bg-stone-300"
+                  p.enabled ? "bg-[#141B33]" : "bg-stone-300"
                 }`}
               >
                 <span
@@ -111,7 +111,7 @@ export default function Settings() {
       </div>
 
       {/* Payout configuration */}
-      <div className="rounded-lg border border-stone-200 bg-white p-5">
+      <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
         <h2 className="flex items-center gap-2 text-base font-semibold text-stone-900">
           <Landmark size={16} className="text-stone-400" />
           Payout Configuration

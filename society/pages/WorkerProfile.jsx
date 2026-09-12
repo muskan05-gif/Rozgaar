@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -17,6 +17,19 @@ export default function WorkerProfile() {
   const { workerId } = useParams();
   const navigate = useNavigate();
   const worker = getWorkerProfile(workerId);
+  const [historyQuery, setHistoryQuery] = useState("");
+
+  const filteredHistory = useMemo(() => {
+    if (!worker) return [];
+    const q = historyQuery.toLowerCase();
+    return worker.bookingHistory.filter(
+      (b) =>
+        !q ||
+        b.customer.toLowerCase().includes(q) ||
+        b.service.toLowerCase().includes(q) ||
+        b.id.toLowerCase().includes(q)
+    );
+  }, [worker, historyQuery]);
 
   if (!worker) {
     return (
@@ -27,7 +40,7 @@ export default function WorkerProfile() {
         <button
           type="button"
           onClick={() => navigate("/society/workers")}
-          className="mt-3 text-sm font-medium text-emerald-700 hover:underline"
+          className="mt-3 text-sm font-medium text-brand-700 hover:underline"
         >
           Back to Workers List
         </button>
@@ -48,14 +61,14 @@ export default function WorkerProfile() {
       </Link>
 
       {/* Profile header */}
-      <div className="rounded-lg border border-stone-200 bg-white p-6">
+      <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <Avatar name={worker.name} size={72} />
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl font-semibold text-stone-900">{worker.name}</h1>
-                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                <span className="flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
                   <BadgeCheck size={12} />
                   Verified Gold Member
                 </span>
@@ -96,7 +109,7 @@ export default function WorkerProfile() {
               </button>
               <button
                 type="button"
-                className="rounded-md bg-emerald-900 px-3.5 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+                className="rounded-md bg-[#141B33] px-3.5 py-2 text-sm font-medium text-white hover:bg-[#1c2647]"
               >
                 Edit Profile
               </button>
@@ -105,7 +118,7 @@ export default function WorkerProfile() {
               Available for Dispatch
               <span
                 className={`relative h-5 w-9 rounded-full transition-colors ${
-                  worker.availableForDispatch ? "bg-emerald-700" : "bg-stone-300"
+                  worker.availableForDispatch ? "bg-[#141B33]" : "bg-stone-300"
                 }`}
               >
                 <span
@@ -121,7 +134,7 @@ export default function WorkerProfile() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* KYC documents */}
-        <div className="rounded-lg border border-stone-200 bg-white p-5">
+        <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
           <h2 className="text-base font-semibold text-stone-900">
             KYC &amp; Cooperative Documents
           </h2>
@@ -140,14 +153,14 @@ export default function WorkerProfile() {
                       <FileCheck2 size={14} className="text-emerald-600" />
                       {doc.label}
                     </span>
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                    <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-medium text-brand-700">
                       {doc.status}
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-stone-400">{doc.note}</p>
                   <button
                     type="button"
-                    className="mt-2 flex items-center gap-1 text-xs font-medium text-emerald-700 hover:underline"
+                    className="mt-2 flex items-center gap-1 text-xs font-medium text-brand-700 hover:underline"
                   >
                     <Eye size={12} />
                     View Document
@@ -160,7 +173,7 @@ export default function WorkerProfile() {
         </div>
 
         {/* Earnings summary */}
-        <div className="rounded-lg border border-stone-200 bg-white p-5">
+        <div className="rounded-lg border border-stone-200 bg-white shadow-sm p-5">
           <h2 className="text-base font-semibold text-stone-900">Earnings Summary</h2>
 
           {earnings ? (
@@ -195,7 +208,7 @@ export default function WorkerProfile() {
                   return (
                     <div
                       key={i}
-                      className="flex-1 rounded-t-sm bg-emerald-900/70"
+                      className="flex-1 rounded-t-sm bg-[#141B33]/70"
                       style={{ height: `${(v / max) * 100}%` }}
                     />
                   );
@@ -217,7 +230,7 @@ export default function WorkerProfile() {
       </div>
 
       {/* Booking history */}
-      <div className="rounded-lg border border-stone-200 bg-white">
+      <div className="rounded-lg border border-stone-200 bg-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 p-5">
           <div>
             <h2 className="text-base font-semibold text-stone-900">Recent Booking History</h2>
@@ -230,7 +243,7 @@ export default function WorkerProfile() {
               <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400" />
               <input
                 placeholder="Filter by customer, service"
-                className="w-56 rounded-md border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                className="w-56 rounded-md border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#141B33]/15"
               />
             </div>
             <button
@@ -246,7 +259,7 @@ export default function WorkerProfile() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-400">
+              <tr className="border-b border-stone-200 bg-stone-50/60 text-xs uppercase tracking-wide text-stone-400">
                 <th className="px-5 py-3 font-medium">Date &amp; Booking ID</th>
                 <th className="px-5 py-3 font-medium">Customer</th>
                 <th className="px-5 py-3 font-medium">Service</th>
@@ -282,7 +295,7 @@ export default function WorkerProfile() {
                       </p>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <span className="inline-flex rounded-full bg-emerald-900 px-2.5 py-0.5 text-xs font-medium text-white">
+                      <span className="inline-flex rounded-full bg-[#141B33] px-2.5 py-0.5 text-xs font-medium text-white">
                         {b.status}
                       </span>
                     </td>

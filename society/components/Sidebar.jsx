@@ -28,8 +28,8 @@ export default function Sidebar() {
     <aside className="sticky top-0 flex h-full w-60 shrink-0 flex-col self-start overflow-y-auto border-r border-stone-200 bg-white">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-900">
-          <Leaf size={18} className="text-emerald-100" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#141B33]">
+          <Leaf size={18} className="text-white/80" />
         </div>
         <div className="leading-tight">
           <p className="text-sm font-semibold text-stone-900">Rozgaar</p>
@@ -46,12 +46,12 @@ export default function Sidebar() {
           return (
             <NavLink
               key={item.key}
-              to={`/society/${item.path}`}
+              to={item.path ? `/society/${item.path}` : "/society"}
               end={item.path === ""}
               className={({ isActive }) =>
                 `group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
                   isActive
-                    ? "bg-emerald-900 text-white font-medium"
+                    ? "bg-[#141B33] text-white font-medium"
                     : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
                 }`
               }
@@ -61,7 +61,7 @@ export default function Sidebar() {
                   <Icon
                     size={17}
                     strokeWidth={2}
-                    className={isActive ? "text-emerald-100" : "text-stone-400 group-hover:text-stone-600"}
+                    className={isActive ? "text-white/80" : "text-stone-400 group-hover:text-stone-600"}
                   />
                   {item.label}
                 </>
