@@ -7,11 +7,17 @@ export default function SignInRoute() {
   const navigate = useNavigate();
   const { startSignIn } = useAuth();
 
-  const handleSendOtp = ({ role, phone }) => {
-    // TODO: call your real "send OTP" API here before navigating
-    startSignIn(role, `+91 ${phone}`);
-    navigate("/verify-otp");
+  const handleSignIn = ({ role, societyId, password }) => {
+    // Save authenticated session
+    startSignIn(role, societyId, password);
+
+    // Navigate according to selected role
+    if (role === "society") {
+      navigate("/society");
+    }if (role === "federation") {
+  navigate("/federation/societies");
+}
   };
 
-  return <SignIn onSendOtp={handleSendOtp} />;
+  return <SignIn onSignIn={handleSignIn} />;
 }
