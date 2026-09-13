@@ -26,6 +26,7 @@ import SocietyDisputes from "../society/pages/Disputes";
 import SocietyPayouts from "../society/pages/Payouts";
 import SocietyReports from "../society/pages/Reports";
 import SocietySettings from "../society/pages/Settings";
+import FederationSocietyView from "../federation/pages/SocietyView";
 
 export default function App() {
   return (
@@ -44,9 +45,16 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<FederationOverview />} />
-            <Route path="societies" element={<FederationSocieties />} />
-            <Route path="workers" element={<FederationWorkers />} />
+           <Route index element={<FederationOverview />} />
+
+<Route path="societies" element={<FederationSocieties />} />
+
+<Route
+  path="society-view"
+  element={<FederationSocietyView />}
+/>
+
+<Route path="workers" element={<FederationWorkers />} />
             <Route path="bookings" element={<FederationBookings />} />
             <Route path="policy-wages" element={<FederationPolicyWages />} />
             <Route path="analytics" element={<FederationAnalytics />} />
