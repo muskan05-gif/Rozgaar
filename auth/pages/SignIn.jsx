@@ -5,7 +5,6 @@ import PromoPanel from "../components/PromoPanel";
 import RoleToggle from "../components/RoleToggle";
 import { footerInfo } from "../data/authContent";
 
-
 export default function SignIn({ onSignIn, isLoading = false, error = "" }) {
   const navigate = useNavigate();
 
