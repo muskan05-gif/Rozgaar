@@ -35,12 +35,7 @@ const federationNavItems = [
     icon: Eye,
     path: "/federation/society-view",
   },
-  {
-    key: "workers",
-    label: "Workers",
-    icon: Users,
-    path: "/federation/workers",
-  },
+ 
   {
     key: "bookings",
     label: "Bookings",

@@ -5,11 +5,11 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 import SignInRoute from "../auth/routes/SignInRoute";
 
-
+// Federation
 import FederationLayout from "../federation/FederationLayout";
 import FederationOverview from "../federation/FederationOverview";
 import FederationSocieties from "../federation/pages/Societies";
-import FederationWorkers from "../federation/pages/Workers";
+import FederationSocietyView from "../federation/pages/SocietyView";
 import FederationBookings from "../federation/pages/Bookings";
 import FederationPolicyWages from "../federation/pages/PolicyWages";
 import FederationAnalytics from "../federation/pages/Analytics";
@@ -17,6 +17,7 @@ import FederationDisputes from "../federation/pages/Disputes";
 import FederationPayouts from "../federation/pages/Payouts";
 import FederationSettings from "../federation/pages/Settings";
 
+// Society
 import SocietyLayout from "../society/SocietyLayout";
 import SocietyOverview from "../society/SocietyOverview";
 import SocietyWorkers from "../society/pages/Workers";
@@ -26,17 +27,27 @@ import SocietyDisputes from "../society/pages/Disputes";
 import SocietyPayouts from "../society/pages/Payouts";
 import SocietyReports from "../society/pages/Reports";
 import SocietySettings from "../society/pages/Settings";
-import FederationSocietyView from "../federation/pages/SocietyView";
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<SignInRoute />} />
-      
 
+          {/* Login */}
+          <Route
+            path="/"
+            element={<Navigate to="/login" replace />}
+          />
+
+          <Route
+            path="/login"
+            element={<SignInRoute />}
+          />
+
+          {/* =========================
+              FEDERATION PORTAL
+          ========================= */}
           <Route
             path="/federation"
             element={
@@ -45,24 +56,59 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-           <Route index element={<FederationOverview />} />
+            {/* Dashboard */}
+            <Route
+              index
+              element={<FederationOverview />}
+            />
 
-<Route path="societies" element={<FederationSocieties />} />
+            {/* Societies */}
+            <Route
+              path="societies"
+              element={<FederationSocieties />}
+            />
 
-<Route
-  path="society-view"
-  element={<FederationSocietyView />}
-/>
+            {/* Society View - Separate Page */}
+            <Route
+              path="society-view"
+              element={<FederationSocietyView />}
+            />
 
-<Route path="workers" element={<FederationWorkers />} />
-            <Route path="bookings" element={<FederationBookings />} />
-            <Route path="policy-wages" element={<FederationPolicyWages />} />
-            <Route path="analytics" element={<FederationAnalytics />} />
-            <Route path="disputes" element={<FederationDisputes />} />
-            <Route path="payouts" element={<FederationPayouts />} />
-            <Route path="settings" element={<FederationSettings />} />
+            {/* Federation pages */}
+            <Route
+              path="bookings"
+              element={<FederationBookings />}
+            />
+
+            <Route
+              path="policy-wages"
+              element={<FederationPolicyWages />}
+            />
+
+            <Route
+              path="analytics"
+              element={<FederationAnalytics />}
+            />
+
+            <Route
+              path="disputes"
+              element={<FederationDisputes />}
+            />
+
+            <Route
+              path="payouts"
+              element={<FederationPayouts />}
+            />
+
+            <Route
+              path="settings"
+              element={<FederationSettings />}
+            />
           </Route>
 
+          {/* =========================
+              SOCIETY PORTAL
+          ========================= */}
           <Route
             path="/society"
             element={
@@ -71,17 +117,53 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<SocietyOverview />} />
-            <Route path="workers" element={<SocietyWorkers />} />
-            <Route path="workers/:workerId" element={<SocietyWorkerProfile />} />
-            <Route path="bookings" element={<SocietyBookings />} />
-            <Route path="disputes" element={<SocietyDisputes />} />
-            <Route path="payouts" element={<SocietyPayouts />} />
-            <Route path="reports" element={<SocietyReports />} />
-            <Route path="settings" element={<SocietySettings />} />
+            <Route
+              index
+              element={<SocietyOverview />}
+            />
+
+            <Route
+              path="workers"
+              element={<SocietyWorkers />}
+            />
+
+            <Route
+              path="workers/:workerId"
+              element={<SocietyWorkerProfile />}
+            />
+
+            <Route
+              path="bookings"
+              element={<SocietyBookings />}
+            />
+
+            <Route
+              path="disputes"
+              element={<SocietyDisputes />}
+            />
+
+            <Route
+              path="payouts"
+              element={<SocietyPayouts />}
+            />
+
+            <Route
+              path="reports"
+              element={<SocietyReports />}
+            />
+
+            <Route
+              path="settings"
+              element={<SocietySettings />}
+            />
           </Route>
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* Unknown routes */}
+          <Route
+            path="*"
+            element={<Navigate to="/login" replace />}
+          />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
