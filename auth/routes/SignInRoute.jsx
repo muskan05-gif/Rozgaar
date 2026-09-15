@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SignIn from "../pages/SignIn";
 import { useAuth } from "../../src/context/AuthContext";
-import { federationLogin } from "../../src/lib/authApi";
+import { federationLogin, societyLogin } from "../../src/lib/authApi";
 
 export default function SignInRoute() {
   const navigate = useNavigate();
@@ -13,31 +13,31 @@ export default function SignInRoute() {
 
   const handleSignIn = async ({ role, societyId, password }) => {
     setError("");
+    setIsLoading(true);
 
-    if (role === "federation") {
-      setIsLoading(true);
-      try {
+    try {
+      if (role === "federation") {
         // societyId doubles as the Federation ID field on this form
         const data = await federationLogin(societyId, password);
 
         // Route tier stays "federation" (matches ProtectedRoute/routes).
-        // We also keep the backend's raw role ("federation_admin") on
-        // the session in case we need it later for permission checks.
+        // Backend's raw role ("federation_admin") kept separately.
         startSignIn(role, data.admin_id, data.access_token, data.role);
         navigate("/federation/societies");
-      } catch (err) {
-        setError(err.message || "Sign in failed. Check your credentials.");
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
+      } else {
+        const data = await societyLogin(societyId, password);
 
-    // Society login isn't live on the backend yet, so this stays
-    // local-only for now. Swap in societyLogin() from authApi.js
-    // once /auth/society/login exists — same pattern as above.
-    startSignIn(role, societyId, null);
-    navigate("/society");
+        // Backend's raw role here is already "society", matching the
+        // app's routing tier, but we still pass it through explicitly
+        // for consistency with the federation branch above.
+        startSignIn(role, data.society_id, data.access_token, data.role);
+        navigate("/society");
+      }
+    } catch (err) {
+      setError(err.message || "Sign in failed. Check your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
