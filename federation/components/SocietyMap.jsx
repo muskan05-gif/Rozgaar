@@ -1,27 +1,114 @@
-import React, { useMemo, useState } from "react";
-import { ChevronDown, Compass } from "lucide-react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { ChevronDown } from "lucide-react";
 import { societyLocations, districtOptions } from "../data/mockData";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 export default function SocietyMap() {
   const [zone, setZone] = useState(districtOptions[0]);
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markersRef = useRef([]);
 
   const visibleLocations = useMemo(() => {
     if (zone === "Punjab North Zone") return societyLocations;
     return societyLocations.filter((loc) => loc.district === zone);
   }, [zone]);
 
-  const hub = visibleLocations[0] || societyLocations[0];
+  // Synchronous, safe map initialization
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapContainerRef.current, {
+        zoomControl: true,
+        attributionControl: true
+      }).setView([31.1471, 75.3412], 8);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      mapInstanceRef.current = map;
+    }
+
+    const timer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update markers and handle single vs multi-item centering smoothly
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
+
+    if (visibleLocations.length > 0) {
+      const bounds = L.latLngBounds([]);
+      let lastLatLon = null;
+
+      visibleLocations.forEach((loc) => {
+        const lat = loc.lat || (32.5 - (loc.y || 50) * 0.03);
+        const lng = loc.lng || (73.5 + (loc.x || 50) * 0.04);
+        lastLatLon = [lat, lng];
+
+        const markerColor = loc.status === "active" ? "#141b33" : "#f59e0b";
+        const customIcon = L.divIcon({
+          className: "custom-div-icon",
+          html: `<div style="background-color: ${markerColor}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+          iconSize: [12, 12],
+          iconAnchor: [6, 6]
+        });
+
+        const marker = L.marker([lat, lng], { icon: customIcon })
+          .addTo(map)
+          .bindPopup(`<strong>${loc.name}</strong><br/>District: ${loc.district}<br/>Status: ${loc.status}`);
+
+        markersRef.current.push(marker);
+        bounds.extend([lat, lng]);
+      });
+
+      // If there's only one location, set view explicitly; otherwise fit bounds
+      if (visibleLocations.length === 1 && lastLatLon) {
+        map.setView(lastLatLon, 11);
+      } else {
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 11 });
+      }
+    }
+
+    // Ensure map recalculates size when district changes
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+  }, [visibleLocations]);
 
   return (
     <div className="rounded-lg border border-stone-200 bg-white p-5">
+      <style>{`
+        .leaflet-tile { max-width: none !important; max-height: none !important; }
+        .leaflet-container { width: 100%; height: 100%; background: #e5e7eb; z-index: 0; }
+      `}</style>
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-stone-900">
             Society Locations
           </h2>
           <p className="mt-0.5 text-sm text-stone-500">
-            Geographic distribution of registered cooperative societies
-            across North Punjab.
+            Geographic distribution of registered cooperative societies across North Punjab.
           </p>
         </div>
 
@@ -52,86 +139,14 @@ export default function SocietyMap() {
         </div>
       </div>
 
-      {/* Map canvas */}
-      <div className="relative mt-4 h-96 w-full overflow-hidden rounded-md border border-stone-200 bg-gradient-to-br from-brand-50/70 via-stone-50 to-brand-50/30">
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-          <defs>
-            <pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse">
-              <path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(20,27,51,0.07)" strokeWidth="0.15" />
-            </pattern>
-          </defs>
-          <rect width="100" height="100" fill="url(#grid)" />
-
-          <path
-            d="M8,30 C4,18 18,6 34,10 C46,2 64,4 74,14 C88,10 98,22 94,36 C100,46 94,62 80,64 C80,78 62,90 46,84 C34,94 16,86 12,72 C0,68 -2,50 8,42 C2,38 4,32 8,30 Z"
-            fill="rgba(20,27,51,0.04)"
-            stroke="rgba(20,27,51,0.2)"
-            strokeWidth="0.45"
-          />
-          <path
-            d="M30,20 C46,14 62,18 70,28 C78,26 84,38 78,46 C80,58 68,68 56,64 C48,72 34,70 30,60 C18,58 16,44 26,38 C20,32 24,24 30,20 Z"
-            fill="rgba(20,27,51,0.05)"
-            stroke="rgba(20,27,51,0.1)"
-            strokeWidth="0.3"
-          />
-
-          {hub && visibleLocations.slice(1).map((loc) => (
-            <line
-              key={loc.id}
-              x1={hub.x}
-              y1={hub.y}
-              x2={loc.x}
-              y2={loc.y}
-              stroke="rgba(20,27,51,0.25)"
-              strokeWidth="0.35"
-              strokeDasharray="1.4 1.2"
-            />
-          ))}
-        </svg>
-
-        <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 bg-white/90 text-stone-500 shadow-sm">
-          <Compass size={16} />
-        </div>
-
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-white/90 px-2 py-1 text-[10px] text-stone-500 shadow-sm">
-          <span className="h-[2px] w-6 bg-stone-400" />
-          25 km
-        </div>
+      <div className="relative mt-4 w-full overflow-hidden rounded-md border border-stone-200" style={{ height: "384px" }}>
+        <div ref={mapContainerRef} style={{ height: "100%", width: "100%" }} />
 
         {visibleLocations.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-sm text-stone-400">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 text-sm text-stone-400 z-10">
             No societies registered in this district yet.
           </div>
         )}
-
-        {visibleLocations.map((loc) => {
-          const isHub = hub && loc.id === hub.id;
-          return (
-            <div
-              key={loc.id}
-              className="absolute -translate-x-1/2 -translate-y-full transition-all duration-300"
-              style={{ left: `${loc.x}%`, top: `${loc.y}%` }}
-            >
-              <div className="flex flex-col items-center">
-                <span
-                  className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium shadow-sm ${
-                    isHub
-                      ? "bg-brand-900 text-white"
-                      : "border border-stone-200 bg-white text-stone-600"
-                  }`}
-                >
-                  {loc.name}
-                </span>
-                <span
-                  className={`mt-0.5 block rounded-full border-2 border-white shadow ${
-                    loc.status === "active" ? "bg-brand-900" : "bg-amber-500"
-                  }`}
-                  style={{ width: isHub ? 14 : 9, height: isHub ? 14 : 9 }}
-                />
-              </div>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
