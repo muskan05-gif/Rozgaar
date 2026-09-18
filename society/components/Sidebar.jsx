@@ -2,11 +2,8 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
-  Building2,
-  Eye,
   Users,
   CalendarCheck,
-  Scale,
   Gavel,
   Wallet,
   FileBarChart,
@@ -15,69 +12,56 @@ import {
   CircleCheck,
 } from "lucide-react";
 
-const federationNavItems = [
+const societyNavItems = [
   {
     key: "dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    path: "/federation",
+    path: "/society",
     end: true,
   },
-  {
-    key: "societies",
-    label: "Societies",
-    icon: Building2,
-    path: "/federation/societies",
-  },
-  
   {
     key: "workers",
     label: "Workers",
     icon: Users,
-    path: "/federation/workers",
+    path: "/society/workers",
   },
   {
     key: "bookings",
     label: "Bookings",
     icon: CalendarCheck,
-    path: "/federation/bookings",
-  },
-  {
-    key: "policy-wages",
-    label: "Policy & Wages",
-    icon: Scale,
-    path: "/federation/policy-wages",
+    path: "/society/bookings",
   },
   {
     key: "disputes",
     label: "Disputes",
     icon: Gavel,
-    path: "/federation/disputes",
+    path: "/society/disputes",
   },
   {
     key: "payouts",
     label: "Payouts",
     icon: Wallet,
-    path: "/federation/payouts",
+    path: "/society/payouts",
   },
   {
-    key: "analytics",
-    label: "Analytics",
+    key: "reports",
+    label: "Reports",
     icon: FileBarChart,
-    path: "/federation/analytics",
+    path: "/society/reports",
   },
   {
     key: "settings",
     label: "Settings",
     icon: Settings,
-    path: "/federation/settings",
+    path: "/society/settings",
   },
 ];
 
 export default function Sidebar() {
   return (
     <aside className="sticky top-0 flex h-full w-60 shrink-0 flex-col self-start overflow-y-auto border-r border-stone-200 bg-white">
-      
+
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#141B33]">
@@ -90,25 +74,25 @@ export default function Sidebar() {
           </p>
 
           <p className="text-[11px] font-medium uppercase tracking-wide text-stone-400">
-            Federation Portal
+            Society Portal
           </p>
         </div>
       </div>
 
-      {/* Federation Node */}
+      {/* Society Information */}
       <div className="mx-3 mb-3 rounded-lg border border-stone-200 bg-stone-50 px-3.5 py-3">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
-          Federation Node
+          Society
         </p>
 
         <p className="mt-1 text-xs font-semibold text-stone-700">
-          IN-DL-CENTRAL-01
+          Kapurthala Cooperative Society
         </p>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-0.5 px-3 py-2">
-        {federationNavItems.map((item) => {
+        {societyNavItems.map((item) => {
           const Icon = item.icon;
 
           return (
@@ -153,7 +137,7 @@ export default function Sidebar() {
 
         <div className="leading-tight">
           <p className="text-xs font-semibold text-stone-700">
-            Federation Portal
+            Society Portal
           </p>
 
           <p className="text-[11px] text-stone-400">
