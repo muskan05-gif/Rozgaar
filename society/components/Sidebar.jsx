@@ -10,6 +10,7 @@ import {
   Settings,
   Leaf,
   CircleCheck,
+  BadgeCheck,
 } from "lucide-react";
 
 const societyNavItems = [
@@ -25,6 +26,12 @@ const societyNavItems = [
     label: "Workers",
     icon: Users,
     path: "/society/workers",
+  },
+  {
+    key: "worker-verification",
+    label: "Worker Verification",
+    icon: BadgeCheck,
+    path: "/society/worker-verification",
   },
   {
     key: "bookings",
