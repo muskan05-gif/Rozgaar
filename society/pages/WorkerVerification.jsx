@@ -15,7 +15,10 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../../src/context/AuthContext";
-import { getPendingSocietyKyc } from "../../src/lib/societyapi";
+import {
+  getPendingSocietyKyc,
+  approveSocietyKyc,
+} from "../../src/lib/societyApi";
 
 export default function WorkerVerification() {
   const { session } = useAuth();
@@ -23,20 +26,26 @@ export default function WorkerVerification() {
   // =========================================================
   // LOAD PENDING KYC FROM BACKEND
   // =========================================================
+  const [kycData, setKycData] = useState(null);
+  const [loadingKyc, setLoadingKyc] = useState(true);
+  const [approvalLoading, setApprovalLoading] = useState(false);
+
   useEffect(() => {
     const loadPendingKyc = async () => {
       try {
+        setLoadingKyc(true);
         const data = await getPendingSocietyKyc(session?.token);
-
         console.log("Pending Society KYC:", data);
+        setKycData(Array.isArray(data) && data.length > 0 ? data[0] : null);
       } catch (error) {
         console.error("Failed to load pending KYC:", error);
+        setKycData(null);
+      } finally {
+        setLoadingKyc(false);
       }
     };
-
-    if (session?.token) {
-      loadPendingKyc();
-    }
+    if (session?.token) loadPendingKyc();
+    else setLoadingKyc(false);
   }, [session?.token]);
 
   // =========================================================
@@ -202,7 +211,7 @@ export default function WorkerVerification() {
   // Worker can only be verified when all sections are approved.
   // =========================================================
 
-  const handleFinalApproval = () => {
+  const handleFinalApproval = async () => {
     const allCertificatesApproved = certificates.every(
       (certificate) => certificate.status === "Approved"
     );
@@ -222,10 +231,23 @@ export default function WorkerVerification() {
       return;
     }
 
-    // Replace this with your backend API call later.
-    console.log("Worker verified:", worker);
+    if (!kycData?.kyc_id) {
+      alert("No pending KYC application found.");
+      return;
+    }
 
-    alert("Worker has been successfully verified.");
+    try {
+      setApprovalLoading(true);
+      const result = await approveSocietyKyc(kycData.kyc_id, session.token);
+      console.log("KYC approval response:", result);
+      alert(result?.message || "Worker KYC approved successfully.");
+      setKycData(null);
+    } catch (error) {
+      console.error("Failed to approve KYC:", error);
+      alert(error.message || "Failed to approve worker KYC.");
+    } finally {
+      setApprovalLoading(false);
+    }
   };
 
   // =========================================================
@@ -949,6 +971,7 @@ export default function WorkerVerification() {
             <button
               type="button"
               onClick={handleFinalApproval}
+              disabled={approvalLoading || loadingKyc || !kycData?.kyc_id}
               className="
                 flex
                 h-10
@@ -962,10 +985,12 @@ export default function WorkerVerification() {
                 text-white
                 transition
                 hover:bg-[#1D2745]
+                disabled:cursor-not-allowed
+                disabled:opacity-50
               "
             >
               <ShieldCheck size={15} />
-              Approve & Verify
+              {approvalLoading ? "Approving..." : "Approve & Verify"}
             </button>
 
           </div>
