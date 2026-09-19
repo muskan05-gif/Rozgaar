@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   User,
   Calendar,
@@ -14,7 +14,31 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { useAuth } from "../../src/context/AuthContext";
+import { getPendingSocietyKyc } from "../../src/lib/societyapi";
+
 export default function WorkerVerification() {
+  const { session } = useAuth();
+
+  // =========================================================
+  // LOAD PENDING KYC FROM BACKEND
+  // =========================================================
+  useEffect(() => {
+    const loadPendingKyc = async () => {
+      try {
+        const data = await getPendingSocietyKyc(session?.token);
+
+        console.log("Pending Society KYC:", data);
+      } catch (error) {
+        console.error("Failed to load pending KYC:", error);
+      }
+    };
+
+    if (session?.token) {
+      loadPendingKyc();
+    }
+  }, [session?.token]);
+
   // =========================================================
   // WORKER INFORMATION
   // =========================================================
