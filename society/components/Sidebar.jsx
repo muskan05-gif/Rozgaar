@@ -8,8 +8,6 @@ import {
   Wallet,
   FileBarChart,
   Settings,
-  Leaf,
-  CircleCheck,
   BadgeCheck,
   TrendingUp,
 } from "lucide-react";
@@ -40,15 +38,12 @@ const societyNavItems = [
     icon: CalendarCheck,
     path: "/society/bookings",
   },
-
-  // ⭐ Demand Forecasting
   {
     key: "demand-forecasting",
     label: "Demand Forecasting",
     icon: TrendingUp,
     path: "/society/demand-forecast",
   },
-
   {
     key: "disputes",
     label: "Disputes",
@@ -67,48 +62,31 @@ const societyNavItems = [
     icon: FileBarChart,
     path: "/society/reports",
   },
-  {
-    key: "settings",
-    label: "Settings",
-    icon: Settings,
-    path: "/society/settings",
-  },
 ];
 
 export default function Sidebar() {
   return (
-    <aside className="sticky top-0 flex h-full w-60 shrink-0 flex-col self-start overflow-y-auto border-r border-stone-200 bg-white">
-
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#141B33]">
-          <Leaf size={18} className="text-white/80" />
-        </div>
-
-        <div className="leading-tight">
-          <p className="text-sm font-semibold text-stone-900">
-            Rozgaar
-          </p>
-
-          <p className="text-[11px] font-medium uppercase tracking-wide text-stone-400">
-            Society Portal
-          </p>
-        </div>
-      </div>
-
-      {/* Society Information */}
-      <div className="mx-3 mb-3 rounded-lg border border-stone-200 bg-stone-50 px-3.5 py-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
-          Society
-        </p>
-
-        <p className="mt-1 text-xs font-semibold text-stone-700">
-          Kapurthala Cooperative Society
-        </p>
-      </div>
-
+    <aside
+      className="
+        fixed
+        left-5
+        top-[110px]
+        z-40
+        flex
+        w-[58px]
+        flex-col
+        items-center
+        rounded-[30px]
+        border
+        border-white/70
+        bg-white/75
+        py-3
+        shadow-[0_8px_30px_rgba(30,60,100,0.08)]
+        backdrop-blur-md
+      "
+    >
       {/* Navigation */}
-      <nav className="flex-1 space-y-0.5 px-3 py-2">
+      <nav className="flex flex-col items-center gap-2">
         {societyNavItems.map((item) => {
           const Icon = item.icon;
 
@@ -117,50 +95,62 @@ export default function Sidebar() {
               key={item.key}
               to={item.path}
               end={item.end}
+              title={item.label}
               className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                `
+                flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-xl
+                transition-all
+                duration-200
+                ${
                   isActive
-                    ? "bg-[#141B33] font-medium text-white"
-                    : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-                }`
+                    ? "bg-[#141B33] text-white shadow-md"
+                    : "text-[#8fa3c2] hover:bg-white hover:text-[#526887]"
+                }
+                `
               }
             >
-              {({ isActive }) => (
-                <>
-                  <Icon
-                    size={17}
-                    strokeWidth={2}
-                    className={
-                      isActive
-                        ? "text-white/80"
-                        : "text-stone-400 group-hover:text-stone-600"
-                    }
-                  />
-
-                  {item.label}
-                </>
-              )}
+              <Icon
+                size={19}
+                strokeWidth={2}
+              />
             </NavLink>
           );
         })}
       </nav>
 
-      {/* Portal Status */}
-      <div className="m-3 flex items-center gap-2.5 rounded-lg border border-stone-200 bg-stone-50 p-3.5">
-        <CircleCheck
-          size={16}
-          className="shrink-0 text-emerald-600"
-        />
-
-        <div className="leading-tight">
-          <p className="text-xs font-semibold text-stone-700">
-            Society Portal
-          </p>
-
-          <p className="text-[11px] text-stone-400">
-            v2.4 Production
-          </p>
-        </div>
+      {/* Settings */}
+      <div className="mt-3 border-t border-slate-200/70 pt-3">
+        <NavLink
+          to="/society/settings"
+          title="Settings"
+          className={({ isActive }) =>
+            `
+            flex
+            h-10
+            w-10
+            items-center
+            justify-center
+            rounded-xl
+            transition-all
+            duration-200
+            ${
+              isActive
+                ? "bg-[#141B33] text-white shadow-md"
+                : "text-[#8fa3c2] hover:bg-white hover:text-[#526887]"
+            }
+            `
+          }
+        >
+          <Settings
+            size={19}
+            strokeWidth={2}
+          />
+        </NavLink>
       </div>
     </aside>
   );

@@ -5,13 +5,20 @@ import TopBar from "./components/TopBar";
 
 export default function SocietyLayout() {
   return (
-    <div className="flex h-screen overflow-hidden bg-stone-50">
+    <div className="min-h-screen bg-[#f7f6f3]">
+      {/* Fixed Sidebar */}
       <Sidebar />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Main Application Area */}
+      <div className="min-h-screen pl-[78px]">
+        {/* Top Bar */}
         <TopBar />
-        <main className="flex-1 space-y-6 overflow-y-auto p-8">
-          <Outlet />
+
+        {/* Page Content */}
+        <main className="px-5 pb-8 pt-4 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-[1700px]">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
