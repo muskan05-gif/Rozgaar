@@ -40,7 +40,7 @@ import SocietyPayouts from "../society/pages/Payouts";
 import SocietyReports from "../society/pages/Reports";
 import SocietySettings from "../society/pages/Settings";
 import WorkerVerification from "../society/pages/WorkerVerification";
-
+import SocietyDemandForecast from "../society/pages/SocietyDemandForecast";
 export default function App() {
   return (
     <AuthProvider>
@@ -193,6 +193,11 @@ export default function App() {
               path="settings"
               element={<SocietySettings />}
             />
+{/* Demand Forecast */}
+ <Route
+  path="demand-forecast"
+  element={<SocietyDemandForecast />}
+/>
           </Route>
 
           {/* =========================

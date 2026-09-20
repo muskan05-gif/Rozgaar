@@ -11,6 +11,7 @@ import {
   Leaf,
   CircleCheck,
   BadgeCheck,
+  TrendingUp,
 } from "lucide-react";
 
 const societyNavItems = [
@@ -39,6 +40,15 @@ const societyNavItems = [
     icon: CalendarCheck,
     path: "/society/bookings",
   },
+
+  // ⭐ Demand Forecasting
+  {
+    key: "demand-forecasting",
+    label: "Demand Forecasting",
+    icon: TrendingUp,
+    path: "/society/demand-forecast",
+  },
+
   {
     key: "disputes",
     label: "Disputes",
