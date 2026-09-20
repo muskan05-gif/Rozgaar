@@ -168,18 +168,7 @@ export default function SignIn({ onSignIn, isLoading = false, error = "" }) {
                 {isLoading ? "Signing in..." : "SIGN IN"}
               </button>
 
-              {/* Sign Up */}
-              <div className="mt-5 text-center text-sm text-stone-400">
-                Don't have an account?{" "}
-
-                <button
-                  type="button"
-                  onClick={handleSignUp}
-                  className="font-medium text-[#28598F] hover:underline"
-                >
-                  Sign Up
-                </button>
-              </div>
+             
 
               {/* Security */}
               <p className="mt-5 flex items-center justify-center gap-1.5 text-[11px] text-stone-400">
