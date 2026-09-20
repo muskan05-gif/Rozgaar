@@ -1,91 +1,67 @@
-import React, { useMemo, useState } from "react";
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../src/context/AuthContext";
 import {
-  CalendarDays,
-  ChevronDown,
-  CloudRain,
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  Info,
+  Loader2,
+  RefreshCw,
   Sparkles,
-  Thermometer,
-  TrendingUp,
-  Activity,
 } from "lucide-react";
 
-const SERVICE_DATA = [
-  {
-    service: "Appliance Repair",
-    forecast: 55,
-    previous: 67,
-  },
-  {
-    service: "Carpentry",
-    forecast: 57,
-    previous: 63,
-  },
-  {
-    service: "Cleaning",
-    forecast: 124,
-    previous: 135,
-  },
-  {
-    service: "Driving",
-    forecast: 62,
-    previous: 67,
-  },
-  {
-    service: "Electrical",
-    forecast: 72,
-    previous: 70,
-  },
-  {
-    service: "Gardening",
-    forecast: 38,
-    previous: 36,
-  },
-  {
-    service: "Painting",
-    forecast: 37,
-    previous: 40,
-  },
-  {
-    service: "Plumbing",
-    forecast: 115,
-    previous: 139,
-  },
-];
+/* ---------------------------------------------------------------
+   Config
+   - Local backend: http://127.0.0.1:8000
+   - Production: https://rozgaar-backend.fastapicloud.dev
+---------------------------------------------------------------- */
+const DEFAULT_BASE_URL = "https://rozgaar-backend.fastapicloud.dev";
 
-const SERVICE_OPTIONS = SERVICE_DATA.map((item) => item.service);
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const DAY_NAMES = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
   "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
-function getPercentageChange(current, previous) {
-  if (!previous) return 0;
+/* ---------------------------------------------------------------
+   Helpers
+---------------------------------------------------------------- */
 
+function parseISODate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+}
+
+function weekdayShort(iso) {
+  return WEEKDAYS[parseISODate(iso).getUTCDay()];
+}
+
+function formatShortDate(iso) {
+  const d = parseISODate(iso);
+  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
+}
+
+function percentChange(current, previous) {
+  if (!previous) return null;
   return ((current - previous) / previous) * 100;
 }
 
-function formatPercentage(value) {
+function formatPercent(value) {
+  if (value === null || value === undefined) return "—";
+
   const rounded = Math.abs(value).toFixed(1);
 
   if (value > 0) return `+${rounded}%`;
@@ -94,166 +70,374 @@ function formatPercentage(value) {
   return "0.0%";
 }
 
-function InputLabel({ children }) {
+/* ---------------------------------------------------------------
+   Data hook
+---------------------------------------------------------------- */
+
+function useWeeklyForecast({ baseUrl, token, onUnauthorized }) {
+  const [state, setState] = useState({
+    status: "loading",
+    data: null,
+    error: null,
+  });
+
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const onUnauthorizedRef = useRef(onUnauthorized);
+  onUnauthorizedRef.current = onUnauthorized;
+
+  const reload = useCallback(() => {
+    setReloadKey((k) => k + 1);
+  }, []);
+
+  useEffect(() => {
+    // Do not call the API if there is no token.
+    if (!token) {
+      setState({
+        status: "error",
+        data: null,
+        error: {
+          message: "You are not logged in. Please log in again.",
+          retryable: false,
+        },
+      });
+
+      return;
+    }
+
+    const controller = new AbortController();
+
+    setState({
+      status: "loading",
+      data: null,
+      error: null,
+    });
+
+    (async () => {
+      try {
+        const res = await fetch(`${baseUrl}/forecast/weekly`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+
+          setState({
+            status: "success",
+            data,
+            error: null,
+          });
+
+          return;
+        }
+
+        if (res.status === 401) {
+          onUnauthorizedRef.current?.();
+
+          setState({
+            status: "error",
+            data: null,
+            error: {
+              message: "Your session has expired. Please log in again.",
+              retryable: false,
+            },
+          });
+
+          return;
+        }
+
+        if (res.status === 403) {
+          setState({
+            status: "error",
+            data: null,
+            error: {
+              message: "You don't have access to this forecast.",
+              retryable: false,
+            },
+          });
+
+          return;
+        }
+
+        if (res.status === 503) {
+          const body = await res.json().catch(() => null);
+
+          setState({
+            status: "error",
+            data: null,
+            error: {
+              message:
+                typeof body?.detail === "string"
+                  ? body.detail
+                  : "The forecast can't be built right now.",
+              retryable: true,
+            },
+          });
+
+          return;
+        }
+
+        setState({
+          status: "error",
+          data: null,
+          error: {
+            message: `Something went wrong (error ${res.status}).`,
+            retryable: true,
+          },
+        });
+      } catch (err) {
+        if (err.name === "AbortError") return;
+
+        setState({
+          status: "error",
+          data: null,
+          error: {
+            message:
+              "Couldn't reach the server. Check your connection and try again.",
+            retryable: true,
+          },
+        });
+      }
+    })();
+
+    return () => controller.abort();
+  }, [baseUrl, token, reloadKey]);
+
+  return {
+    ...state,
+    reload,
+  };
+}
+
+/* ---------------------------------------------------------------
+   Small components
+---------------------------------------------------------------- */
+
+function ChangeBadge({ value }) {
+  if (value === null || value === undefined) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-500">
+        —
+      </span>
+    );
+  }
+
+  const isUp = value > 0;
+  const isDown = value < 0;
+
+  const tone = isUp
+    ? "bg-emerald-50 text-emerald-700"
+    : isDown
+      ? "bg-red-50 text-red-700"
+      : "bg-stone-100 text-stone-500";
+
   return (
-    <label className="mb-1.5 block text-xs font-semibold text-stone-600">
-      {children}
-    </label>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${tone}`}
+    >
+      {isUp && <ArrowUpRight size={13} />}
+      {isDown && <ArrowDownRight size={13} />}
+      {formatPercent(value)}
+    </span>
   );
 }
 
-function SelectInput({ value, onChange, children }) {
+/* ---------------------------------------------------------------
+   7-day mini chart
+---------------------------------------------------------------- */
+
+function MiniChart({ daily = [] }) {
+  if (!daily.length) {
+    return (
+      <div className="flex h-16 items-center justify-center text-xs text-stone-400">
+        No daily forecast available
+      </div>
+    );
+  }
+
+  const max = Math.max(...daily.map((d) => d.predicted), 1);
+
   return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={onChange}
-        className="h-11 w-full appearance-none rounded-lg border border-stone-200 bg-white px-3.5 pr-10 text-sm font-medium text-stone-800 outline-none transition focus:border-[#141B33] focus:ring-2 focus:ring-[#141B33]/10"
-      >
+    <div>
+      <div className="flex h-16 items-end gap-1.5">
+        {daily.map((d) => (
+          <div
+            key={d.date}
+            className="flex-1 rounded-t-[3px] bg-[#485168]"
+            style={{
+              height: `${Math.max((d.predicted / max) * 100, 4)}%`,
+            }}
+            title={`${weekdayShort(d.date)} ${formatShortDate(
+              d.date
+            )}: ${Number(d.predicted).toFixed(1)}`}
+          />
+        ))}
+      </div>
+
+      <div className="mt-1.5 flex gap-1.5 border-t border-stone-200 pt-1.5">
+        {daily.map((d) => (
+          <span
+            key={d.date}
+            className="flex-1 text-center text-[10px] font-medium text-stone-400"
+          >
+            {weekdayShort(d.date).slice(0, 2)}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------
+   Service card
+---------------------------------------------------------------- */
+
+function ServiceCard({ item }) {
+  return (
+    <div className="rounded-xl border border-stone-200 bg-white p-5">
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-sm font-semibold text-[#141B33]">
+          {item.service_type}
+        </h3>
+
+        <ChangeBadge value={item.change_pct} />
+      </div>
+
+      <p className="mt-4 text-3xl font-semibold text-[#141B33]">
+        {item.expected_next_week}
+      </p>
+
+      <p className="mt-0.5 text-xs text-stone-500">
+        Previous week: {item.previous_week}
+      </p>
+
+      <div className="mt-5">
+        <MiniChart daily={item.daily} />
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------
+   Summary stat
+---------------------------------------------------------------- */
+
+function SummaryStat({ label, children }) {
+  return (
+    <div className="rounded-xl border border-stone-200 bg-white p-5">
+      <p className="text-xs font-medium text-stone-500">{label}</p>
+
+      <div className="mt-2 text-2xl font-semibold text-[#141B33]">
         {children}
-      </select>
-
-      <ChevronDown
-        size={16}
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-stone-400"
-      />
+      </div>
     </div>
   );
 }
 
-function NumberInput({
-  value,
-  onChange,
-  min,
-  max,
-  step = "1",
-  suffix,
-}) {
-  return (
-    <div className="relative">
-      <input
-        type="number"
-        value={value}
-        min={min}
-        max={max}
-        step={step}
-        onChange={onChange}
-        className={`h-11 w-full rounded-lg border border-stone-200 bg-white px-3.5 ${
-          suffix ? "pr-14" : ""
-        } text-sm font-medium text-stone-800 outline-none transition focus:border-[#141B33] focus:ring-2 focus:ring-[#141B33]/10`}
-      />
-
-      {suffix && (
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400">
-          {suffix}
-        </span>
-      )}
-    </div>
-  );
-}
+/* ---------------------------------------------------------------
+   Page
+---------------------------------------------------------------- */
 
 export default function SocietyDemandForecast() {
-  const [serviceType, setServiceType] = useState("Cleaning");
+  const navigate = useNavigate();
 
-  const [forecastDate, setForecastDate] = useState("2026-10-27");
+  // Get the authenticated session from your existing AuthContext.
+  const { session } = useAuth();
 
-  const [temperature, setTemperature] = useState(27.5);
-  const [rainfall, setRainfall] = useState(4.2);
+  const token = session?.token;
 
-  const [lag1, setLag1] = useState(18);
-  const [lag7, setLag7] = useState(21);
-  const [rolling7, setRolling7] = useState(19.4);
+  const baseUrl = DEFAULT_BASE_URL;
 
-  const [forecastResult, setForecastResult] = useState(null);
+  const onUnauthorized = useCallback(() => {
+    navigate("/login", { replace: true });
+  }, [navigate]);
 
-  const selectedDate = useMemo(() => {
-    const date = new Date(`${forecastDate}T00:00:00`);
+  const { status, data, error, reload } = useWeeklyForecast({
+    baseUrl,
+    token,
+    onUnauthorized,
+  });
 
-    return {
-      day: DAY_NAMES[date.getDay()],
-      month: MONTH_NAMES[date.getMonth()],
-      monthNumber: date.getMonth() + 1,
-      isWeekend: date.getDay() === 0 || date.getDay() === 6,
-    };
-  }, [forecastDate]);
+  const [sortBy, setSortBy] = useState("name");
 
-  const totalForecast = SERVICE_DATA.reduce(
-    (total, item) => total + item.forecast,
-    0
-  );
+  const services = data?.services ?? [];
 
-  const totalPrevious = SERVICE_DATA.reduce(
-    (total, item) => total + item.previous,
-    0
-  );
+  /* -------------------------------------------------------------
+     Summary totals
+  ------------------------------------------------------------- */
 
-  const overallChange = getPercentageChange(
-    totalForecast,
-    totalPrevious
-  );
-
-  const handleGenerateForecast = () => {
-    /*
-      Prototype frontend calculation.
-
-      The production version will send these exact features
-      to the FastAPI demand forecasting endpoint:
-
-      service_type
-      day_of_week
-      month
-      is_weekend
-      temperature
-      rainfall
-      lag_1
-      lag_7
-      rolling_7_mean
-    */
-
-    const selectedService = SERVICE_DATA.find(
-      (item) => item.service === serviceType
+  const totals = useMemo(() => {
+    const expected = services.reduce(
+      (sum, service) => sum + Number(service.expected_next_week || 0),
+      0
     );
 
-    const baseDemand = selectedService?.forecast || 50;
+    const previous = services.reduce(
+      (sum, service) => sum + Number(service.previous_week || 0),
+      0
+    );
 
-    let prediction = baseDemand;
+    return {
+      expected,
+      previous,
+      change: percentChange(expected, previous),
+    };
+  }, [services]);
 
-    // Small prototype adjustments based on input conditions.
-    prediction += (Number(lag1) - 18) * 0.15;
-    prediction += (Number(lag7) - 21) * 0.2;
-    prediction += (Number(rolling7) - 19.4) * 0.25;
+  /* -------------------------------------------------------------
+     Chart scaling
+  ------------------------------------------------------------- */
 
-    // Weather adjustment.
-    if (Number(rainfall) > 10) {
-      prediction -= 2;
+  const chartMax = useMemo(
+    () =>
+      Math.max(
+        ...services.flatMap((service) => [
+          Number(service.expected_next_week || 0),
+          Number(service.previous_week || 0),
+        ]),
+        1
+      ),
+    [services]
+  );
+
+  /* -------------------------------------------------------------
+     Peak service
+  ------------------------------------------------------------- */
+
+  const peakService = useMemo(() => {
+    if (!services.length) return null;
+
+    return services.reduce((best, service) =>
+      service.expected_next_week > best.expected_next_week
+        ? service
+        : best
+    );
+  }, [services]);
+
+  /* -------------------------------------------------------------
+     Sorting
+  ------------------------------------------------------------- */
+
+  const sortedServices = useMemo(() => {
+    if (sortBy === "demand") {
+      return [...services].sort(
+        (a, b) => b.expected_next_week - a.expected_next_week
+      );
     }
 
-    if (Number(temperature) >= 32) {
-      prediction -= 1;
-    }
-
-    if (selectedDate.isWeekend) {
-      prediction += 1;
-    }
-
-    prediction = Math.max(0, Math.round(prediction));
-
-    setForecastResult({
-      value: prediction,
-      service: serviceType,
-      date: forecastDate,
-      day: selectedDate.day,
-      month: selectedDate.month,
-      isWeekend: selectedDate.isWeekend,
-    });
-  };
+    return services;
+  }, [services, sortBy]);
 
   return (
     <div className="min-h-full bg-[#fafafa] p-6">
+      {/* =========================================================
+          Header
+      ========================================================= */}
 
-      {/* =====================================================
-          PAGE HEADER
-      ===================================================== */}
       <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <div className="flex items-center gap-3">
@@ -267,513 +451,264 @@ export default function SocietyDemandForecast() {
           </div>
 
           <p className="mt-1.5 text-sm text-stone-500">
-            Expected bookings per service compared with the previous week.
+            Overall demand forecast across all societies
+            {data &&
+              ` for ${formatShortDate(
+                data.forecast_from
+              )} to ${formatShortDate(data.forecast_to)}`}
+            .
           </p>
         </div>
 
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-          <Sparkles
-            size={15}
-            className="text-emerald-600"
-          />
+        {status === "success" && (
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+            <Sparkles size={15} className="text-emerald-600" />
 
-          <span className="text-xs font-semibold text-emerald-700">
-            AI Forecast Active
-          </span>
-        </div>
+            <span className="text-xs font-semibold text-emerald-700">
+              AI Forecast Active
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* =====================================================
-          EXISTING DEMAND FORECAST CARD
-      ===================================================== */}
-      <section className="rounded-2xl border border-stone-200 bg-white p-7 shadow-sm">
+      {/* =========================================================
+          Loading
+      ========================================================= */}
 
-        {/* Card Header */}
-        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-[#141B33]">
-                Demand Forecast
-              </h2>
-
-              <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500">
-                Next Week
-              </span>
-            </div>
-
-            <p className="mt-2 text-sm text-stone-500">
-              Expected bookings per service compared with the previous week.
-            </p>
-          </div>
-
-          <div className="text-right">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-stone-400">
-              Volume
-            </p>
-
-            <p className="text-xl font-semibold text-[#141B33]">
-              {totalForecast} total
-            </p>
-          </div>
+      {status === "loading" && (
+        <div className="flex items-center justify-center gap-3 rounded-2xl border border-stone-200 bg-white p-16 text-sm text-stone-500 shadow-sm">
+          <Loader2 size={18} className="animate-spin text-[#141B33]" />
+          Loading forecast…
         </div>
-
-        {/* Legend */}
-        <div className="mt-8 flex items-center gap-7">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-[2px] bg-[#141B33]" />
-
-            <span className="text-sm text-stone-500">
-              Expected Bookings
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-[2px] border border-[#c8ceda] bg-[#f1f2f5]" />
-
-            <span className="text-sm text-stone-500">
-              Previous Week
-            </span>
-          </div>
-        </div>
-
-        {/* =================================================
-            BAR CHART
-        ================================================= */}
-        <div className="mt-8 overflow-x-auto">
-          <div className="min-w-[850px]">
-
-            {/* Bars */}
-            <div className="flex h-[285px] items-end justify-between gap-5 border-b border-stone-200 px-4">
-
-              {SERVICE_DATA.map((item) => {
-                const maxValue = 145;
-
-                const forecastHeight =
-                  (item.forecast / maxValue) * 235;
-
-                const previousHeight =
-                  (item.previous / maxValue) * 235;
-
-                const change = getPercentageChange(
-                  item.forecast,
-                  item.previous
-                );
-
-                return (
-                  <div
-                    key={item.service}
-                    className="flex h-full flex-1 items-end justify-center gap-2"
-                  >
-                    {/* Previous */}
-                    <div
-                      className="w-9 rounded-t-md border border-[#c8ceda] bg-[#f1f2f5]"
-                      style={{
-                        height: `${previousHeight}px`,
-                      }}
-                      title={`Previous week: ${item.previous}`}
-                    />
-
-                    {/* Forecast */}
-                    <div
-                      className={`relative w-9 rounded-t-md ${
-                        item.service === "Cleaning"
-                          ? "bg-[#141B33]"
-                          : "bg-[#485168]"
-                      }`}
-                      style={{
-                        height: `${forecastHeight}px`,
-                      }}
-                      title={`Forecast: ${item.forecast}`}
-                    >
-                      {item.service === "Cleaning" && (
-                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-semibold text-[#141B33]">
-                          124 · Peak
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Labels */}
-            <div className="mt-4 flex justify-between gap-5 px-4">
-              {SERVICE_DATA.map((item) => {
-                const change = getPercentageChange(
-                  item.forecast,
-                  item.previous
-                );
-
-                return (
-                  <div
-                    key={item.service}
-                    className="flex-1 text-center"
-                  >
-                    <p className="mx-auto max-w-[95px] text-sm font-medium leading-5 text-[#141B33]">
-                      {item.service}
-                    </p>
-
-                    <p className="mt-1 text-xs font-medium text-stone-500">
-                      {formatPercentage(change)}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Summary */}
-        <div className="mt-7 border-t border-stone-200 pt-5">
-          <p className="text-sm text-stone-500">
-            Cleaning: about 11 fewer bookings than last week (135 to 124).
-            Highest expected demand of any service.
-          </p>
-
-          <p className="mt-4 text-sm font-semibold text-[#141B33]">
-            Change vs Previous Week:{" "}
-            {formatPercentage(overallChange)}
-          </p>
-        </div>
-      </section>
-
-      {/* =====================================================
-          FORECAST INPUTS
-      ===================================================== */}
-      <section className="mt-6 rounded-2xl border border-stone-200 bg-white p-7 shadow-sm">
-
-        {/* Header */}
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-[#141B33]">
-                Forecast Inputs
-              </h2>
-
-              <span className="rounded-full bg-[#eef0f7] px-3 py-1 text-xs font-medium text-[#141B33]">
-                AI Prediction
-              </span>
-            </div>
-
-            <p className="mt-2 text-sm text-stone-500">
-              Enter the expected conditions to generate a service-specific
-              demand forecast.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs text-stone-400">
-            <Activity size={15} />
-            Model inputs
-          </div>
-        </div>
-
-        {/* Inputs */}
-        <div className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-
-          {/* Service Type */}
-          <div>
-            <InputLabel>Service Type</InputLabel>
-
-            <SelectInput
-              value={serviceType}
-              onChange={(e) => {
-                setServiceType(e.target.value);
-                setForecastResult(null);
-              }}
-            >
-              {SERVICE_OPTIONS.map((service) => (
-                <option
-                  key={service}
-                  value={service}
-                >
-                  {service}
-                </option>
-              ))}
-            </SelectInput>
-          </div>
-
-          {/* Forecast Date */}
-          <div>
-            <InputLabel>Forecast Date</InputLabel>
-
-            <div className="relative">
-              <CalendarDays
-                size={16}
-                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"
-              />
-
-              <input
-                type="date"
-                value={forecastDate}
-                onChange={(e) => {
-                  setForecastDate(e.target.value);
-                  setForecastResult(null);
-                }}
-                className="h-11 w-full rounded-lg border border-stone-200 bg-white px-3.5 pl-10 text-sm font-medium text-stone-800 outline-none transition focus:border-[#141B33] focus:ring-2 focus:ring-[#141B33]/10"
-              />
-            </div>
-          </div>
-
-          {/* Day */}
-          <div>
-            <InputLabel>Day of Week</InputLabel>
-
-            <div className="flex h-11 items-center rounded-lg border border-stone-200 bg-stone-50 px-3.5">
-              <span className="text-sm font-medium text-stone-700">
-                {selectedDate.day}
-              </span>
-            </div>
-          </div>
-
-          {/* Month */}
-          <div>
-            <InputLabel>Month</InputLabel>
-
-            <div className="flex h-11 items-center rounded-lg border border-stone-200 bg-stone-50 px-3.5">
-              <span className="text-sm font-medium text-stone-700">
-                {selectedDate.month}
-              </span>
-            </div>
-          </div>
-
-          {/* Temperature */}
-          <div>
-            <InputLabel>Temperature</InputLabel>
-
-            <div className="relative">
-              <Thermometer
-                size={16}
-                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"
-              />
-
-              <input
-                type="number"
-                value={temperature}
-                min="-10"
-                max="60"
-                step="0.1"
-                onChange={(e) =>
-                  setTemperature(e.target.value)
-                }
-                className="h-11 w-full rounded-lg border border-stone-200 bg-white px-3.5 pl-10 pr-14 text-sm font-medium text-stone-800 outline-none transition focus:border-[#141B33] focus:ring-2 focus:ring-[#141B33]/10"
-              />
-
-              <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400">
-                °C
-              </span>
-            </div>
-          </div>
-
-          {/* Rainfall */}
-          <div>
-            <InputLabel>Rainfall</InputLabel>
-
-            <div className="relative">
-              <CloudRain
-                size={16}
-                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"
-              />
-
-              <input
-                type="number"
-                value={rainfall}
-                min="0"
-                max="500"
-                step="0.1"
-                onChange={(e) =>
-                  setRainfall(e.target.value)
-                }
-                className="h-11 w-full rounded-lg border border-stone-200 bg-white px-3.5 pl-10 pr-14 text-sm font-medium text-stone-800 outline-none transition focus:border-[#141B33] focus:ring-2 focus:ring-[#141B33]/10"
-              />
-
-              <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400">
-                mm
-              </span>
-            </div>
-          </div>
-
-          {/* Previous Day Demand */}
-          <div>
-            <InputLabel>Previous Day Demand</InputLabel>
-
-            <NumberInput
-              value={lag1}
-              min="0"
-              max="1000"
-              onChange={(e) =>
-                setLag1(e.target.value)
-              }
-            />
-          </div>
-
-          {/* Last Week Demand */}
-          <div>
-            <InputLabel>Same Day Last Week</InputLabel>
-
-            <NumberInput
-              value={lag7}
-              min="0"
-              max="1000"
-              onChange={(e) =>
-                setLag7(e.target.value)
-              }
-            />
-          </div>
-
-          {/* Rolling Average */}
-          <div>
-            <InputLabel>7-Day Average Demand</InputLabel>
-
-            <NumberInput
-              value={rolling7}
-              min="0"
-              max="1000"
-              step="0.1"
-              onChange={(e) =>
-                setRolling7(e.target.value)
-              }
-            />
-          </div>
-        </div>
-
-        {/* Automatically derived values */}
-        <div className="mt-6 rounded-xl border border-stone-200 bg-stone-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
-            Automatically Derived
-          </p>
-
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div>
-              <p className="text-xs text-stone-400">
-                Day of Week
-              </p>
-
-              <p className="mt-1 text-sm font-semibold text-stone-700">
-                {selectedDate.day}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-stone-400">
-                Month
-              </p>
-
-              <p className="mt-1 text-sm font-semibold text-stone-700">
-                {selectedDate.month}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-stone-400">
-                Weekend
-              </p>
-
-              <p className="mt-1 text-sm font-semibold text-stone-700">
-                {selectedDate.isWeekend ? "Yes" : "No"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Generate Button */}
-        <div className="mt-6 flex justify-end">
-          <button
-            type="button"
-            onClick={handleGenerateForecast}
-            className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#141B33] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1c2544] active:scale-[0.99]"
-          >
-            <TrendingUp size={16} />
-            Generate Forecast
-          </button>
-        </div>
-      </section>
-
-      {/* =====================================================
-          FORECAST RESULT
-      ===================================================== */}
-      {forecastResult && (
-        <section className="mt-6 rounded-2xl border border-[#dfe3ee] bg-white p-7 shadow-sm">
-
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-
-            <div>
-              <div className="flex items-center gap-2">
-                <Sparkles
-                  size={18}
-                  className="text-[#141B33]"
-                />
-
-                <h2 className="text-lg font-semibold text-[#141B33]">
-                  Forecast Result
-                </h2>
-              </div>
-
-              <p className="mt-2 text-sm text-stone-500">
-                Predicted demand for{" "}
-                <span className="font-semibold text-stone-700">
-                  {forecastResult.service}
-                </span>{" "}
-                on{" "}
-                <span className="font-semibold text-stone-700">
-                  {forecastResult.day}, {forecastResult.month}
-                </span>
-                .
-              </p>
-            </div>
-
-            <div className="flex items-center gap-5">
-              <div className="text-right">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-stone-400">
-                  Expected Bookings
-                </p>
-
-                <p className="mt-1 text-4xl font-semibold text-[#141B33]">
-                  {forecastResult.value}
-                </p>
-              </div>
-
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef0f7]">
-                <TrendingUp
-                  size={22}
-                  className="text-[#141B33]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 border-t border-stone-200 pt-5">
-            <p className="text-sm text-stone-500">
-              The forecast uses historical demand, recent booking
-              patterns, weather conditions and the selected service
-              category.
-            </p>
-          </div>
-        </section>
       )}
 
-      {/* =====================================================
-          MODEL INFORMATION
-      ===================================================== */}
-      <div className="mt-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-        <Sparkles
-          size={16}
-          className="mt-0.5 shrink-0 text-amber-600"
-        />
+      {/* =========================================================
+          Error
+      ========================================================= */}
 
-        <div>
-          <p className="text-xs font-semibold text-amber-800">
-            Demand Forecasting Model
+      {status === "error" && (
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-red-200 bg-white p-12 text-center shadow-sm">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50">
+            <AlertTriangle size={20} className="text-red-600" />
+          </div>
+
+          <p className="max-w-md text-sm text-stone-700">
+            {error.message}
           </p>
 
-          <p className="mt-1 text-xs leading-5 text-amber-700">
-            Forecast inputs are prepared using the same feature
-            structure as the trained demand forecasting model. The
-            current Generate Forecast action is a frontend prototype;
-            the production prediction will be connected to the
-            FastAPI model endpoint.
-          </p>
+          {error.retryable && (
+            <button
+              type="button"
+              onClick={reload}
+              className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#141B33] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1c2544] active:scale-[0.99]"
+            >
+              <RefreshCw size={15} />
+              Try again
+            </button>
+          )}
         </div>
-      </div>
+      )}
+
+      {/* =========================================================
+          Success
+      ========================================================= */}
+
+      {status === "success" && data && (
+        <>
+          {/* Prototype banner */}
+
+          {data.data_source === "synthetic_seed" && (
+            <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <Info
+                size={16}
+                className="mt-0.5 shrink-0 text-amber-600"
+              />
+
+              <p className="text-xs font-semibold leading-5 text-amber-800">
+                Prototype forecast, based on synthetic data
+              </p>
+            </div>
+          )}
+
+          {/* =====================================================
+              Summary
+          ===================================================== */}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <SummaryStat label="Expected next week">
+              {totals.expected}
+            </SummaryStat>
+
+            <SummaryStat label="Previous week">
+              {totals.previous}
+            </SummaryStat>
+
+            <SummaryStat label="Change vs previous week">
+              <ChangeBadge value={totals.change} />
+            </SummaryStat>
+          </div>
+
+          {/* =====================================================
+              Overview chart
+          ===================================================== */}
+
+          <section className="mt-6 rounded-2xl border border-stone-200 bg-white p-7 shadow-sm">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-[#141B33]">
+                  Demand by service
+                </h2>
+
+                <p className="mt-2 text-sm text-stone-500">
+                  Expected bookings per service compared with the
+                  previous week.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center gap-7">
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-[2px] bg-[#141B33]" />
+
+                <span className="text-sm text-stone-500">
+                  Expected Bookings
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-[2px] border border-[#c8ceda] bg-[#f1f2f5]" />
+
+                <span className="text-sm text-stone-500">
+                  Previous Week
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-8 overflow-x-auto">
+              <div className="min-w-[850px]">
+                <div className="flex h-[285px] items-end justify-between gap-5 border-b border-stone-200 px-4">
+                  {services.map((item) => {
+                    const isPeak =
+                      item.service_type === peakService?.service_type;
+
+                    return (
+                      <div
+                        key={item.service_type}
+                        className="flex h-full flex-1 items-end justify-center gap-2"
+                      >
+                        {/* Previous week */}
+
+                        <div
+                          className="w-9 rounded-t-md border border-[#c8ceda] bg-[#f1f2f5]"
+                          style={{
+                            height: `${
+                              (item.previous_week / chartMax) * 235
+                            }px`,
+                          }}
+                          title={`Previous week: ${item.previous_week}`}
+                        />
+
+                        {/* Forecast */}
+
+                        <div
+                          className={`relative w-9 rounded-t-md ${
+                            isPeak
+                              ? "bg-[#141B33]"
+                              : "bg-[#485168]"
+                          }`}
+                          style={{
+                            height: `${
+                              (item.expected_next_week / chartMax) *
+                              235
+                            }px`,
+                          }}
+                          title={`Forecast: ${item.expected_next_week}`}
+                        >
+                          {isPeak && (
+                            <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-semibold text-[#141B33]">
+                              {item.expected_next_week} · Peak
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Service names */}
+
+                <div className="mt-4 flex justify-between gap-5 px-4">
+                  {services.map((item) => (
+                    <div
+                      key={item.service_type}
+                      className="flex-1 text-center"
+                    >
+                      <p className="mx-auto max-w-[95px] text-sm font-medium leading-5 text-[#141B33]">
+                        {item.service_type}
+                      </p>
+
+                      <p className="mt-1 text-xs font-medium text-stone-500">
+                        {formatPercent(item.change_pct)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* =====================================================
+              Per-service cards
+          ===================================================== */}
+
+          <section className="mt-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-[#141B33]">
+                Daily outlook by service
+              </h2>
+
+              <div className="inline-flex rounded-lg border border-stone-200 bg-white p-1">
+                {[
+                  { id: "name", label: "A–Z" },
+                  { id: "demand", label: "Highest demand" },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setSortBy(opt.id)}
+                    className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                      sortBy === opt.id
+                        ? "bg-[#141B33] text-white"
+                        : "text-stone-500 hover:text-[#141B33]"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {sortedServices.map((item) => (
+                <ServiceCard
+                  key={item.service_type}
+                  item={item}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* =====================================================
+              Footer
+          ===================================================== */}
+
+          <p className="mt-6 text-xs text-stone-500">
+            Model: {data.model.name} · typical error about{" "}
+            {Number(data.model.test_mae).toFixed(1)} requests/day
+          </p>
+        </>
+      )}
     </div>
   );
 }
+
